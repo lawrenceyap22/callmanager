@@ -1,4 +1,4 @@
-package ph.intrepidstream.callmanager;
+package ph.intrepidstream.callmanager.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+
+import ph.intrepidstream.callmanager.R;
+import ph.intrepidstream.callmanager.service.CallManageService;
 
 public class MainActivity extends AppCompatActivity {
     // Remove the below line after defining your own ad unit ID.
@@ -70,16 +73,12 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return id==R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
     private void setDetectEnabled(boolean enable) {
         detectEnabled = enable;
-        Intent intent = new Intent(this, CallDetectService.class);
+        Intent intent = new Intent(this, CallManageService.class);
         if (enable) {
             // start detect service
             startService(intent);
