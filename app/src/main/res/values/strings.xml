@@ -1,14 +1,7 @@
 <resources>
     <string name="app_name">Call Manager</string>
+
     <string name="action_settings">Settings</string>
-    <string name="outgoing_warning_title">Call Manager</string>
-    <string name="outgoing_warning_message">Number is in the blocked list.\n\nThis may incur additional charges.</string>
-    <string name="outgoing_warning_positive">Make Call</string>
-    <string name="outgoing_warning_negative">Cancel</string>
-    <string name="permission_denied_title">Permission Denied</string>
-    <string name="permission_denied_message">Without this permission, the app is unable to proceed the call once it is temporarily blocked by the warning. Are you sure you want to deny this permission?</string>
-    <string name="permission_denied_positive">I\'m Sure</string>
-    <string name="permission_denied_negative">No</string>
     <!-- -
         This is an ad unit ID for a banner test ad. Replace with your own banner ad unit id.
         For more information, see https://support.google.com/admob/answer/3052638
