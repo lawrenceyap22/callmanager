@@ -14,4 +14,10 @@
         For more information, see https://support.google.com/admob/answer/3052638
     <!- -->
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+
+    <!-- Tab Titles -->
+    <string name="call_logs_tab_title">LOG</string>
+    <string name="block_list_tab_title">BLOCK</string>
+    <string name="settings_tab_title">SETTINGS</string>
+    <string name="dummy_tab_title">DUMMY</string>
 </resources>

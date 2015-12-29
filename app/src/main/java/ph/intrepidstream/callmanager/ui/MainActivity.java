@@ -1,52 +1,42 @@
 package ph.intrepidstream.callmanager.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import ph.intrepidstream.callmanager.R;
-import ph.intrepidstream.callmanager.service.CallManageService;
+import ph.intrepidstream.callmanager.ui.fragment.BlockListFragment;
+import ph.intrepidstream.callmanager.ui.fragment.CMPagerAdapter;
+import ph.intrepidstream.callmanager.ui.fragment.CallLogsFragment;
+import ph.intrepidstream.callmanager.ui.fragment.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
             + "To show live ads, replace the ad unit ID in res/values/strings.xml with your own ad unit ID.";
 
-    private boolean detectEnabled;
-
-    private Button buttonToggleDetect;
-    private Button buttonExit;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        buttonToggleDetect = (Button) findViewById(R.id.buttonDetectToggle);
-        buttonToggleDetect.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setDetectEnabled(!detectEnabled);
-            }
-        });
+        CMPagerAdapter pagerAdapter = new CMPagerAdapter(getSupportFragmentManager());
+        pagerAdapter.addFragment(new CallLogsFragment(), getString(R.string.call_logs_tab_title));
+        pagerAdapter.addFragment(new BlockListFragment(), getString(R.string.block_list_tab_title));
+        pagerAdapter.addFragment(new SettingsFragment(), getString(R.string.settings_tab_title));
 
-        buttonExit = (Button) findViewById(R.id.buttonExit);
-        buttonExit.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setDetectEnabled(false);
-                MainActivity.this.finish();
-            }
-        });
+        ViewPager viewPager = (ViewPager) findViewById(R.id.activity_main_view_pager);
+        viewPager.setAdapter(pagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.activity_main_tab_layout);
+        tabLayout.setupWithViewPager(viewPager);
 
         // Load an ad into the AdMob banner view.
         AdView adView = (AdView) findViewById(R.id.adView);
@@ -76,21 +66,6 @@ public class MainActivity extends AppCompatActivity {
         return id==R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
-    private void setDetectEnabled(boolean enable) {
-        detectEnabled = enable;
-        Intent intent = new Intent(this, CallManageService.class);
-        if (enable) {
-            // start detect service
-            startService(intent);
 
-            buttonToggleDetect.setText("Disable service");
-        }
-        else {
-            // stop detect service
-            stopService(intent);
-
-            buttonToggleDetect.setText("Enable service");
-        }
-    }
 
 }

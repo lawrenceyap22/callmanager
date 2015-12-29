@@ -5,20 +5,34 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
-    <Button
-        android:id="@+id/buttonDetectToggle"
-        android:layout_width="fill_parent"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/activity_main_toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:text="Enable service" />
+        android:layout_alignParentTop="true"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/AppTheme">
 
-    <Button
-        android:id="@+id/buttonExit"
-        android:layout_width="fill_parent"
+    <android.support.design.widget.TabLayout
+        android:id="@+id/activity_main_tab_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/buttonDetectToggle"
-        android:text="Exit" />
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/AppTheme"
+        ads:tabIndicatorColor="@color/colorTabIndicator"
+        ads:tabTextColor="@android:color/white"
+        ads:tabSelectedTextColor="@android:color/white"
+        ads:tabMode="fixed"
+        ads:tabGravity="fill" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/activity_main_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/activity_main_toolbar" />
 
     <!-- view for AdMob Banner Ad -->
     <com.google.android.gms.ads.AdView
