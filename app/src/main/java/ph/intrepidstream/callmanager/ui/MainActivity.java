@@ -1,23 +1,33 @@
 package ph.intrepidstream.callmanager.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SwitchCompat;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import ph.intrepidstream.callmanager.R;
-import ph.intrepidstream.callmanager.ui.fragment.BlockListFragment;
-import ph.intrepidstream.callmanager.ui.fragment.CMPagerAdapter;
-import ph.intrepidstream.callmanager.ui.fragment.CallLogsFragment;
-import ph.intrepidstream.callmanager.ui.fragment.SettingsFragment;
+import ph.intrepidstream.callmanager.service.CallManageService;
+import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
 
 public class MainActivity extends AppCompatActivity {
+    private boolean detectEnabled;
+
+    private Button buttonToggleDetect;
+    private Button buttonExit;
+
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
             + "To show live ads, replace the ad unit ID in res/values/strings.xml with your own ad unit ID.";
@@ -27,16 +37,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CMPagerAdapter pagerAdapter = new CMPagerAdapter(getSupportFragmentManager());
-        pagerAdapter.addFragment(new CallLogsFragment(), getString(R.string.call_logs_tab_title));
-        pagerAdapter.addFragment(new BlockListFragment(), getString(R.string.block_list_tab_title));
-        pagerAdapter.addFragment(new SettingsFragment(), getString(R.string.settings_tab_title));
+        ActionBar actionBar = getSupportActionBar();
+        setupCustomActionBar(actionBar);
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.activity_main_view_pager);
-        viewPager.setAdapter(pagerAdapter);
+        SwitchCompat serviceEnabledSwitch = (SwitchCompat) findViewById(R.id.action_bar_switch);
+        setupServiceEnabledSwitch(serviceEnabledSwitch);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.activity_main_tab_layout);
-        tabLayout.setupWithViewPager(viewPager);
+        ExpandableListView expandableListView = (ExpandableListView) findViewById(R.id.activity_main_expandable_list);
+        setupExpandableListView(expandableListView);
+
+        FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.activity_main_floating_action_button);
+        setupFloatingActionButton(floatingActionButton);
 
         // Load an ad into the AdMob banner view.
         AdView adView = (AdView) findViewById(R.id.adView);
@@ -48,6 +59,12 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, TOAST_TEXT, Toast.LENGTH_LONG).show();
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // Return false so that the three-dot menu will not show up. Menu is just
+        // "invisible", and is there just in case a need for it arises in the future.
+        return false;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,9 +80,60 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        return id==R.id.action_settings || super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
+    private void setupCustomActionBar(ActionBar actionBar) {
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
 
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View customView = inflater.inflate(R.layout.custom_actionbar, null);
+
+        actionBar.setCustomView(customView);
+        actionBar.setDisplayShowCustomEnabled(true);
+    }
+
+    private void setupServiceEnabledSwitch(SwitchCompat serviceEnabledSwitch) {
+        serviceEnabledSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                setDetectEnabled(isChecked);
+            }
+        });
+
+        boolean isServiceEnabled = getServiceEnabledStatus();
+        serviceEnabledSwitch.setChecked(isServiceEnabled);
+    }
+
+    private boolean getServiceEnabledStatus() {
+        // TODO: Place code here for checking if the app blocking service is enabled
+        return false;
+    }
+
+    private void setupExpandableListView(ExpandableListView expandableListView) {
+        expandableListView.setAdapter(new ExpandableBlockListViewAdapter(this));
+    }
+
+    private void setupFloatingActionButton(FloatingActionButton floatingActionButton) {
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: Go to add rule activity
+            }
+        });
+    }
+
+    private void setDetectEnabled(boolean enable) {
+        detectEnabled = enable;
+        Intent intent = new Intent(this, CallManageService.class);
+        if (enable) {
+            // start detect service
+            startService(intent);
+        } else {
+            // stop detect service
+            stopService(intent);
+        }
+    }
 
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_gravity="fill_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:textColor="@android:color/white"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Title" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/action_bar_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:theme="@style/AppSwitch"
+        android:layout_alignParentRight="true" />
+
+</RelativeLayout>
