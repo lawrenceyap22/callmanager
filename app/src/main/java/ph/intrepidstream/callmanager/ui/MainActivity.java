@@ -119,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Go to add rule activity
+                Intent addRuleIntent = new Intent(v.getContext(), AddRuleActivity.class);
+                startActivity(addRuleIntent);
             }
         });
     }

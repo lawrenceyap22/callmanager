@@ -33,6 +33,7 @@
 
         <activity
             android:name=".ui.DialogActivity"
+            android:excludeFromRecents="true"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
 
         <!-- Include the AdActivity configChanges and theme. -->
@@ -52,6 +53,7 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".ui.AddRuleActivity" />
     </application>
 
 </manifest>

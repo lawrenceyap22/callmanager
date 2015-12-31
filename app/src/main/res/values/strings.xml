@@ -9,15 +9,15 @@
     <string name="permission_denied_message">Without this permission, the app is unable to proceed the call once it is temporarily blocked by the warning. Are you sure you want to deny this permission?</string>
     <string name="permission_denied_positive">I\'m Sure</string>
     <string name="permission_denied_negative">No</string>
+    <string name="add_rule_title">Add Rule</string>
+    <string name="add_rule_save">Save</string>
+    <string name="add_rule_name_hint">Name</string>
+    <string name="add_rule_rules_label">Rules:</string>
+    <string name="add_rule_number_hint">Number</string>
+    <string name="add_rule_another_field">Add another field</string>
     <!-- -
         This is an ad unit ID for a banner test ad. Replace with your own banner ad unit id.
         For more information, see https://support.google.com/admob/answer/3052638
     <!- -->
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
-
-    <!-- Tab Titles -->
-    <string name="call_logs_tab_title">LOG</string>
-    <string name="block_list_tab_title">BLOCK</string>
-    <string name="settings_tab_title">SETTINGS</string>
-    <string name="dummy_tab_title">DUMMY</string>
 </resources>
