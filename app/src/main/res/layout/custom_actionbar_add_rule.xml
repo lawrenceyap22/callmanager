@@ -12,7 +12,7 @@
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:onClick="close"
-        android:src="@android:drawable/ic_delete"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:tint="@android:color/white"
         ads:backgroundTint="@color/colorPrimary" />
 

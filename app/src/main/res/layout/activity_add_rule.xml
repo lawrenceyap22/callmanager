@@ -4,8 +4,6 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ph.intrepidstream.callmanager.ui.AddRuleActivity">
 
@@ -13,13 +11,21 @@
         android:id="@+id/add_rule_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:hint="@string/add_rule_name_hint" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/add_rule_rules_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/add_rule_name"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:paddingBottom="10dp"
         android:paddingTop="16dp"
         android:text="@string/add_rule_rules_label"
@@ -28,39 +34,27 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/textView">
+        android:layout_above="@+id/add_rule_another_field"
+        android:layout_below="@id/add_rule_rules_label">
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/add_rule_fields"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical" />
 
-            <LinearLayout
-                android:id="@+id/add_rule_field1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Spinner
-                    android:id="@+id/add_rule_spinner1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <EditText
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/add_rule_number_hint"
-                    android:inputType="phone" />
-
-            </LinearLayout>
-        </RelativeLayout>
     </ScrollView>
 
     <Button
+        android:id="@id/add_rule_another_field"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="@string/add_rule_another_field"
-        android:onClick="addRuleField"/>
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:onClick="addAdditionalRuleField"
+        android:text="@string/add_rule_another_field" />
 
 </RelativeLayout>

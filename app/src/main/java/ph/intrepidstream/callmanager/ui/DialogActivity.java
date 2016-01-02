@@ -28,10 +28,10 @@ public class DialogActivity extends Activity {
         Intent intent = getIntent();
         phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.outgoing_warning_title))
-                .setMessage(getString(R.string.outgoing_warning_message))
+        builder.setTitle(R.string.outgoing_warning_title)
+                .setMessage(R.string.outgoing_warning_message)
                 .setCancelable(false)
-                .setPositiveButton(getString(R.string.outgoing_warning_positive), new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.outgoing_warning_positive, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -39,7 +39,7 @@ public class DialogActivity extends Activity {
                         finish();
                     }
                 })
-                .setNegativeButton(getString(R.string.outgoing_warning_negative), new DialogInterface.OnClickListener() {
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
@@ -67,16 +67,16 @@ public class DialogActivity extends Activity {
 
     private void showRequestPermissionRationale(final Activity thisActivity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.permission_denied_title))
-                .setMessage(getString(R.string.permission_denied_message))
+        builder.setTitle(R.string.permission_denied_title)
+                .setMessage(R.string.permission_denied_message)
                 .setCancelable(false)
-                .setPositiveButton(getString(R.string.permission_denied_positive), new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.permission_denied_positive, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.cancel();
                     }
                 })
-                .setNegativeButton(getString(R.string.permission_denied_negative), new DialogInterface.OnClickListener() {
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CALL_PHONE);
