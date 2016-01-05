@@ -1,11 +1,13 @@
 package ph.intrepidstream.callmanager.ui;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,12 +23,14 @@ import com.google.android.gms.ads.AdView;
 import ph.intrepidstream.callmanager.R;
 import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
+import ph.intrepidstream.callmanager.util.DBHelper;
 
 public class MainActivity extends AppCompatActivity {
     private boolean detectEnabled;
 
     private Button buttonToggleDetect;
     private Button buttonExit;
+    private SQLiteDatabase db;
 
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
@@ -36,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        db = new DBHelper(this).getWritableDatabase();
 
         ActionBar actionBar = getSupportActionBar();
         setupCustomActionBar(actionBar);

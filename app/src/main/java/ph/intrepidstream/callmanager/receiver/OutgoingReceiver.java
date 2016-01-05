@@ -13,7 +13,7 @@ public class OutgoingReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if(action.equals(Intent.ACTION_NEW_OUTGOING_CALL)) {
             String phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
-            if(phoneNumber.equals("09233733518")){
+            if(phoneNumber.equals("09178599670")){
                 if(!AppGlobal.shouldProceedCall){
                     setResultData(null);
                     showWarningDialog(context, phoneNumber);
