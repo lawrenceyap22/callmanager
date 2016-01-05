@@ -26,4 +26,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:8.4.0'
     compile 'com.android.support:support-v4:23.1.1'
     compile 'com.android.support:design:23.1.1'
+    compile 'org.apmem.tools:layouts:1.10'
+    compile 'org.apache.commons:commons-lang3:3.4'
 }
