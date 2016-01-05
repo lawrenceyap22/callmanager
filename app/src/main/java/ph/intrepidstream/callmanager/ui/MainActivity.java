@@ -1,6 +1,8 @@
 package ph.intrepidstream.callmanager.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -10,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -23,10 +24,7 @@ import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
 
 public class MainActivity extends AppCompatActivity {
-    private boolean detectEnabled;
-
-    private Button buttonToggleDetect;
-    private Button buttonExit;
+    private boolean isServiceEnabled;
 
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
@@ -75,11 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
@@ -98,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         serviceEnabledSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                setDetectEnabled(isChecked);
+                enableService(isChecked);
             }
         });
 
@@ -107,8 +101,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean getServiceEnabledStatus() {
-        // TODO: Place code here for checking if the app blocking service is enabled
-        return false;
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        return sharedPref.getBoolean(getString(R.string.call_manage_service_key), false);
     }
 
     private void setupExpandableListView(ExpandableListView expandableListView) {
@@ -125,16 +119,22 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setDetectEnabled(boolean enable) {
-        detectEnabled = enable;
+    private void enableService(boolean enable) {
+        isServiceEnabled = enable;
         Intent intent = new Intent(this, CallManageService.class);
         if (enable) {
-            // start detect service
             startService(intent);
         } else {
-            // stop detect service
             stopService(intent);
         }
     }
 
+    @Override
+    protected void onStop() {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putBoolean(getString(R.string.call_manage_service_key), isServiceEnabled);
+        editor.apply();
+        super.onStop();
+    }
 }
