@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ph.intrepidstream.callmanager.R;
-import ph.intrepidstream.callmanager.util.Rule;
+import ph.intrepidstream.callmanager.util.RuleEnum;
 
 public class AddRuleActivity extends AppCompatActivity {
 
@@ -67,7 +67,7 @@ public class AddRuleActivity extends AppCompatActivity {
         startsWithAdd.setVisibility(View.INVISIBLE);
         startsWithLayout = (FlowLayout) findViewById(R.id.add_rule_starts_with_list);
         startsWithRuleItems = new ArrayList<>();
-        setUpSpinner(startsWithSpinner, new String[]{Rule.STARTS_WITH.getDisplayString(), Rule.NOT_STARTS_WITH.getDisplayString()});
+        setUpSpinner(startsWithSpinner, new String[]{RuleEnum.STARTS_WITH.getDisplayString(), RuleEnum.NOT_STARTS_WITH.getDisplayString()});
         setUpTextChangedListener(startsWithText, startsWithAdd);
     }
 
@@ -78,7 +78,7 @@ public class AddRuleActivity extends AppCompatActivity {
         equalsAdd.setVisibility(View.INVISIBLE);
         equalsLayout = (FlowLayout) findViewById(R.id.add_rule_equals_list);
         equalsRuleItems = new ArrayList<>();
-        setUpSpinner(equalsSpinner, new String[]{Rule.EQUALS.getDisplayString(), Rule.NOT_EQUALS.getDisplayString()});
+        setUpSpinner(equalsSpinner, new String[]{RuleEnum.EQUALS.getDisplayString(), RuleEnum.NOT_EQUALS.getDisplayString()});
         setUpTextChangedListener(equalsText, equalsAdd);
     }
 

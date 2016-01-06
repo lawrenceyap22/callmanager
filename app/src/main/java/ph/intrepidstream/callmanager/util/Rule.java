@@ -1,16 +1,29 @@
 package ph.intrepidstream.callmanager.util;
 
-public enum Rule {
+/**
+ * Created by Justin on 1/6/2016.
+ */
+public class Rule {
+    private String name;
+    private int state;
 
-    STARTS_WITH("starts with"), NOT_STARTS_WITH("not starts with"), EQUALS("equals"), NOT_EQUALS("not equals");
-
-    private String displayString;
-
-    Rule(String displayString) {
-        this.displayString = displayString;
+    public int getState() {
+        return state;
     }
 
-    public String getDisplayString() {
-        return displayString;
+    public void setState(int state) {
+        this.state = state;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String toString(){
+        return name + ": " + state;
     }
 }

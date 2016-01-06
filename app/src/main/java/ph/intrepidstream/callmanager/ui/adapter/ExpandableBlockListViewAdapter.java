@@ -1,6 +1,8 @@
 package ph.intrepidstream.callmanager.ui.adapter;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ph.intrepidstream.callmanager.R;
+import ph.intrepidstream.callmanager.util.Condition;
+import ph.intrepidstream.callmanager.util.DBHelper;
+import ph.intrepidstream.callmanager.util.Rule;
 
 /**
  * Created by Jayzon on 2015/12/30.
@@ -19,15 +24,37 @@ import ph.intrepidstream.callmanager.R;
 public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
     private Context context;
 
-    private List<String> listItems;
+    private List<Rule> ruleList;
+    private List<Condition> conditionList;
 
-    public ExpandableBlockListViewAdapter(Context context) {
+    public ExpandableBlockListViewAdapter(Context context, DBHelper dbHelper, SQLiteDatabase db) {
         this.context = context;
 
-        // Test code
-        listItems = new ArrayList<String>();
-        for(int i = 1; i <= 10; i++) {
-            listItems.add("Test item # " + i);
+        ruleList = new ArrayList<Rule>();
+        conditionList = new ArrayList<Condition>();
+
+        Cursor ruleCursor = dbHelper.getRules(db);
+        if (ruleCursor.moveToFirst()) {
+            do {
+                Rule rule = new Rule();
+                int ruleID = ruleCursor.getInt(ruleCursor.getColumnIndex(dbHelper.RULE_COLUMN_ID));
+                rule.setName(ruleCursor.getString(ruleCursor.getColumnIndex(dbHelper.RULE_COLUMN_NAME)));
+                rule.setState(ruleCursor.getInt(ruleCursor.getColumnIndex(dbHelper.RULE_COLUMN_STATE)));
+                ruleList.add(rule);
+
+                Cursor conditionCursor = dbHelper.getConditions(db,ruleID);
+                if(conditionCursor.moveToFirst()){
+                    do{
+                        Condition condition = new Condition();
+                        condition.setRule_id(conditionCursor.getInt(conditionCursor.getColumnIndex(dbHelper.CONDITION_COLUMN_RULE_ID)));
+                        condition.setCode(conditionCursor.getInt(conditionCursor.getColumnIndex(dbHelper.CONDITION_COLUMN_CODE)));
+                        condition.setNumber(conditionCursor.getString(conditionCursor.getColumnIndex(dbHelper.CONDITION_COLUMN_NUMBER)));
+                        conditionList.add(condition);
+                    } while(conditionCursor.moveToNext());
+                }
+
+
+            } while (ruleCursor.moveToNext());
         }
     }
 
@@ -39,7 +66,7 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
     @Override
     public int getGroupCount() {
         // TODO: Modify
-        return listItems.size();
+        return ruleList.size();
     }
 
     @Override
@@ -51,13 +78,13 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
     @Override
     public Object getGroup(int groupPosition) {
         // TODO: Modify
-        return listItems.get(groupPosition);
+        return ruleList.get(groupPosition);
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
         // TODO: Modify
-        return listItems.get(groupPosition);
+        return conditionList.get(groupPosition);
     }
 
     @Override
@@ -86,7 +113,7 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         }
 
         TextView textView = (TextView) convertView.findViewById(R.id.blocklist_group_name_textview);
-        textView.setText(listItems.get(groupPosition));
+        textView.setText(ruleList.get(groupPosition).toString());
 
         return convertView;
     }
@@ -100,7 +127,7 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         }
 
         TextView textView = (TextView) convertView.findViewById(R.id.blocklist_child_name_textview);
-        textView.setText(listItems.get(groupPosition));
+        textView.setText(conditionList.get(groupPosition).toString());
 
         return convertView;
     }
