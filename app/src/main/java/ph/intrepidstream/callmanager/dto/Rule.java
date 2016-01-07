@@ -1,8 +1,5 @@
-package ph.intrepidstream.callmanager.util;
+package ph.intrepidstream.callmanager.dto;
 
-/**
- * Created by Justin on 1/6/2016.
- */
 public class Rule {
     private String name;
     private int state;

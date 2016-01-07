@@ -3,7 +3,6 @@ package ph.intrepidstream.callmanager.ui.adapter;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,13 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ph.intrepidstream.callmanager.R;
-import ph.intrepidstream.callmanager.util.Condition;
+import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.util.DBHelper;
-import ph.intrepidstream.callmanager.util.Rule;
+import ph.intrepidstream.callmanager.dto.Rule;
 
-/**
- * Created by Jayzon on 2015/12/30.
- */
 public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
     private Context context;
 
@@ -30,25 +26,25 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
     public ExpandableBlockListViewAdapter(Context context, DBHelper dbHelper, SQLiteDatabase db) {
         this.context = context;
 
-        ruleList = new ArrayList<Rule>();
-        conditionList = new ArrayList<Condition>();
+        ruleList = new ArrayList<>();
+        conditionList = new ArrayList<>();
 
         Cursor ruleCursor = dbHelper.getRules(db);
         if (ruleCursor.moveToFirst()) {
             do {
                 Rule rule = new Rule();
-                int ruleID = ruleCursor.getInt(ruleCursor.getColumnIndex(dbHelper.RULE_COLUMN_ID));
-                rule.setName(ruleCursor.getString(ruleCursor.getColumnIndex(dbHelper.RULE_COLUMN_NAME)));
-                rule.setState(ruleCursor.getInt(ruleCursor.getColumnIndex(dbHelper.RULE_COLUMN_STATE)));
+                int ruleID = ruleCursor.getInt(ruleCursor.getColumnIndex(DBHelper.RULE_COLUMN_ID));
+                rule.setName(ruleCursor.getString(ruleCursor.getColumnIndex(DBHelper.RULE_COLUMN_NAME)));
+                rule.setState(ruleCursor.getInt(ruleCursor.getColumnIndex(DBHelper.RULE_COLUMN_STATE)));
                 ruleList.add(rule);
 
                 Cursor conditionCursor = dbHelper.getConditions(db,ruleID);
                 if(conditionCursor.moveToFirst()){
                     do{
                         Condition condition = new Condition();
-                        condition.setRule_id(conditionCursor.getInt(conditionCursor.getColumnIndex(dbHelper.CONDITION_COLUMN_RULE_ID)));
-                        condition.setCode(conditionCursor.getInt(conditionCursor.getColumnIndex(dbHelper.CONDITION_COLUMN_CODE)));
-                        condition.setNumber(conditionCursor.getString(conditionCursor.getColumnIndex(dbHelper.CONDITION_COLUMN_NUMBER)));
+                        condition.setRule_id(conditionCursor.getInt(conditionCursor.getColumnIndex(DBHelper.CONDITION_COLUMN_RULE_ID)));
+                        condition.setCode(conditionCursor.getInt(conditionCursor.getColumnIndex(DBHelper.CONDITION_COLUMN_CODE)));
+                        condition.setNumber(conditionCursor.getString(conditionCursor.getColumnIndex(DBHelper.CONDITION_COLUMN_NUMBER)));
                         conditionList.add(condition);
                     } while(conditionCursor.moveToNext());
                 }

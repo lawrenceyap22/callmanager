@@ -36,8 +36,9 @@
         android:layout_toEndOf="@id/add_rule_title"
         android:layout_toRightOf="@id/add_rule_title"
         android:background="?android:attr/selectableItemBackground"
-        android:gravity="center"
+        android:gravity="right|center_vertical"
         android:onClick="saveRule"
+        android:paddingRight="20dp"
         android:text="@string/add_rule_save"
         android:textColor="@android:color/white" />
 
