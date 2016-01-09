@@ -15,6 +15,14 @@
     <string name="add_rule_discard_changes">Discard your changes?</string>
     <string name="preference_file_key">ph.intrepidstream.callmanager.PREFERENCE_FILE_KEY</string>
     <string name="call_manage_service_key">ph.intrepidstream.callmanager.CALL_MANAGE_SERVICE_KEY</string>
+
+    <!-- For Predefined Prefixes -->
+    <string name="globe_operator">Globe / Touch Mobile</string>
+    <string name="smart_operator">Smart / Talk n Text</string>
+    <string name="sun_operator">Sun Cellular</string>
+    <string name="extelcom_operator">Extelcom</string>
+    <string name="next_mobile_operator">Next Mobile</string>
+    <string name="roaming_numbers">Roaming</string>
     <!-- -
         This is an ad unit ID for a banner test ad. Replace with your own banner ad unit id.
         For more information, see https://support.google.com/admob/answer/3052638

@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -23,13 +22,9 @@ import com.google.android.gms.ads.AdView;
 import ph.intrepidstream.callmanager.R;
 import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
-import ph.intrepidstream.callmanager.util.DBHelper;
 
 public class MainActivity extends AppCompatActivity {
     private boolean isServiceEnabled;
-
-    private DBHelper dbHelper;
-    private SQLiteDatabase db;
 
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
@@ -39,10 +34,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        dbHelper = new DBHelper(this);
-        db = dbHelper.getWritableDatabase();
-        dbHelper.printData(db);
 
         ActionBar actionBar = getSupportActionBar();
         setupCustomActionBar(actionBar);
@@ -115,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupExpandableListView(ExpandableListView expandableListView) {
-        expandableListView.setAdapter(new ExpandableBlockListViewAdapter(this,dbHelper,db));
+        expandableListView.setAdapter(new ExpandableBlockListViewAdapter(this));
     }
 
     private void setupFloatingActionButton(FloatingActionButton floatingActionButton) {

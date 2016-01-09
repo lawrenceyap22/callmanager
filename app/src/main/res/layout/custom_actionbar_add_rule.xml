@@ -18,7 +18,7 @@
         ads:backgroundTint="@color/colorPrimary" />
 
     <TextView
-        android:id="@+id/add_rule_title"
+
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_toEndOf="@id/add_rule_cancel"
@@ -33,12 +33,9 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_toEndOf="@id/add_rule_title"
-        android:layout_toRightOf="@id/add_rule_title"
         android:background="?android:attr/selectableItemBackground"
-        android:gravity="right|center_vertical"
+        android:gravity="center"
         android:onClick="saveRule"
-        android:paddingRight="20dp"
         android:text="@string/add_rule_save"
         android:textColor="@android:color/white" />
 
