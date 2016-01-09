@@ -6,10 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import ph.intrepidstream.callmanager.BuildConfig;
@@ -23,12 +20,6 @@ import static ph.intrepidstream.callmanager.db.CallManagerDatabaseContract.RuleE
 public class DBHelper extends SQLiteOpenHelper {
 
     private final String TAG = DBHelper.class.getName();
-    private final String[] GLOBE_PREFIXES = {"0817", "0905", "0906", "0915", "0916", "0917", "0926", "0927", "0935", "0936", "0937", "0945", "0975", "0976", "0977", "0994", "0995", "0996", "0997"};
-    private final String[] SMART_PREFIXES = {"0813", "0907", "0908", "0909", "0910", "0911", "0912", "0913", "0914", "0918", "0919", "0920", "0921", "0928", "0929", "0930", "0938", "0939", "0946", "0947", "0948", "0949", "0950", "0970", "0981", "0989", "0998", "0999"};
-    private final String[] SUN_PREFIXES = {"0922", "0923", "0924", "0925", "0932", "0933", "0934", "0942", "0943"};
-    private final String[] EXTELCOM_PREFIXES = {"0973", "0974"};
-    private final String[] NEXTMOBILE_PREFIXES = {"0978", "0979"};
-    private final String[] ROAMING_PREFIXES = {"00"};
 
     private Context context;
 
@@ -48,17 +39,18 @@ public class DBHelper extends SQLiteOpenHelper {
         ContentValues contentValues;
         Long newId;
         boolean hasError;
-        Iterator<String> numberIterator;
+        int numberCtr;
+        String[] numbers;
 
-        Map<String, List<String>> defaultData = new LinkedHashMap<>(6);
-        defaultData.put(context.getString(R.string.globe_operator), Arrays.asList(GLOBE_PREFIXES));
-        defaultData.put(context.getString(R.string.smart_operator), Arrays.asList(SMART_PREFIXES));
-        defaultData.put(context.getString(R.string.sun_operator), Arrays.asList(SUN_PREFIXES));
-        defaultData.put(context.getString(R.string.extelcom_operator), Arrays.asList(EXTELCOM_PREFIXES));
-        defaultData.put(context.getString(R.string.next_mobile_operator), Arrays.asList(NEXTMOBILE_PREFIXES));
-        defaultData.put(context.getString(R.string.roaming_numbers), Arrays.asList(ROAMING_PREFIXES));
+        Map<String, String[]> defaultData = new LinkedHashMap<>(6);
+        defaultData.put(context.getString(R.string.globe_operator), context.getString(R.string.globe_prefixes).split(","));
+        defaultData.put(context.getString(R.string.smart_operator), context.getString(R.string.smart_prefixes).split(","));
+        defaultData.put(context.getString(R.string.sun_operator), context.getString(R.string.sun_prefixes).split(","));
+        defaultData.put(context.getString(R.string.extelcom_operator), context.getString(R.string.extelcom_prefixes).split(","));
+        defaultData.put(context.getString(R.string.next_mobile_operator), context.getString(R.string.next_mobile_prefixes).split(","));
+        defaultData.put(context.getString(R.string.roaming_numbers), context.getString(R.string.roaming_prefixes).split(","));
 
-        for (Map.Entry<String, List<String>> defaultDataEntry : defaultData.entrySet()) {
+        for (Map.Entry<String, String[]> defaultDataEntry : defaultData.entrySet()) {
             db.beginTransaction();
             contentValues = new ContentValues();
             contentValues.put(RuleEntry.COLUMN_NAME_NAME, defaultDataEntry.getKey());
@@ -68,16 +60,18 @@ public class DBHelper extends SQLiteOpenHelper {
             newId = db.insert(RuleEntry.TABLE_NAME, null, contentValues);
             if (newId != -1) {
                 hasError = false;
-                numberIterator = defaultDataEntry.getValue().iterator();
-                while (!hasError && numberIterator.hasNext()) {
+                numberCtr = 0;
+                numbers = defaultDataEntry.getValue();
+                while (!hasError && numberCtr < numbers.length) {
                     contentValues = new ContentValues();
                     contentValues.put(ConditionEntry.COLUMN_NAME_RULE_ID, newId);
                     contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, ConditionLookup.STARTS_WITH.toString());
-                    contentValues.put(ConditionEntry.COLUMN_NAME_NUMBER, numberIterator.next());
+                    contentValues.put(ConditionEntry.COLUMN_NAME_NUMBER, numbers[numberCtr]);
 
                     if (db.insert(ConditionEntry.TABLE_NAME, null, contentValues) == -1) {
                         hasError = true;
                     }
+                    numberCtr++;
                 }
 
                 if (!hasError) {

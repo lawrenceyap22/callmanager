@@ -67,7 +67,7 @@ public class AddRuleActivity extends AppCompatActivity {
         startsWithAdd.setVisibility(View.INVISIBLE);
         startsWithLayout = (FlowLayout) findViewById(R.id.add_rule_starts_with_list);
         startsWithRuleItems = new ArrayList<>();
-        setUpSpinner(startsWithSpinner, new String[]{ConditionLookup.STARTS_WITH.toString(), ConditionLookup.NOT_STARTS_WITH.toString()});
+        setUpSpinner(startsWithSpinner, new String[]{ConditionLookup.STARTS_WITH.getDisplayText(), ConditionLookup.NOT_STARTS_WITH.getDisplayText()});
         setUpTextChangedListener(startsWithText, startsWithAdd);
     }
 
