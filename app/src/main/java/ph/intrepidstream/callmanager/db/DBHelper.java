@@ -51,12 +51,12 @@ public class DBHelper extends SQLiteOpenHelper {
         defaultData.put(context.getString(R.string.roaming_numbers), context.getString(R.string.roaming_prefixes).split(","));
 
         for (Map.Entry<String, String[]> defaultDataEntry : defaultData.entrySet()) {
-            db.beginTransaction();
             contentValues = new ContentValues();
             contentValues.put(RuleEntry.COLUMN_NAME_NAME, defaultDataEntry.getKey());
-            contentValues.put(RuleEntry.COLUMN_NAME_STATE, RuleState.OFF.toString());
+            contentValues.put(RuleEntry.COLUMN_NAME_STATE, RuleState.OFF.name());
             contentValues.put(RuleEntry.COLUMN_NAME_APP_GENERATED, true);
 
+            db.beginTransaction();
             newId = db.insert(RuleEntry.TABLE_NAME, null, contentValues);
             if (newId != -1) {
                 hasError = false;
@@ -65,7 +65,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 while (!hasError && numberCtr < numbers.length) {
                     contentValues = new ContentValues();
                     contentValues.put(ConditionEntry.COLUMN_NAME_RULE_ID, newId);
-                    contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, ConditionLookup.STARTS_WITH.toString());
+                    contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, ConditionLookup.STARTS_WITH.name());
                     contentValues.put(ConditionEntry.COLUMN_NAME_NUMBER, numbers[numberCtr]);
 
                     if (db.insert(ConditionEntry.TABLE_NAME, null, contentValues) == -1) {
@@ -79,14 +79,9 @@ public class DBHelper extends SQLiteOpenHelper {
                         Log.d(TAG, "Default data " + defaultDataEntry.getKey() + " inserted successfully.");
                     }
                     db.setTransactionSuccessful();
-                } else {
-                    Log.e(TAG, "One record failed to insert into table " + ConditionEntry.TABLE_NAME);
                 }
-                db.endTransaction();
-            } else {
-                db.endTransaction();
-                Log.e(TAG, "Cannot insert " + defaultDataEntry.getKey() + "  into table " + RuleEntry.TABLE_NAME);
             }
+            db.endTransaction();
         }
     }
 

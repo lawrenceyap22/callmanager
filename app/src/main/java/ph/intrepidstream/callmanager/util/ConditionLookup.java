@@ -10,10 +10,6 @@ public enum ConditionLookup {
         this.displayText = displayText;
     }
 
-    public String getDisplayText() {
-        return displayText;
-    }
-
     public static ConditionLookup findByDisplayText(String displayText) {
         for (ConditionLookup conditionLookup : values()) {
             if (displayText.equals(conditionLookup.displayText)) {
@@ -21,5 +17,10 @@ public enum ConditionLookup {
             }
         }
         throw new IllegalArgumentException("No value for the given argument.");
+    }
+
+    @Override
+    public String toString() {
+        return displayText;
     }
 }

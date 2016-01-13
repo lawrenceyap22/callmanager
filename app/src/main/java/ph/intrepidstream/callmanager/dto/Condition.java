@@ -1,17 +1,56 @@
 package ph.intrepidstream.callmanager.dto;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import ph.intrepidstream.callmanager.util.ConditionLookup;
 
-public class Condition {
+public class Condition implements Parcelable {
     private Long id;
     private Long ruleId;
     private ConditionLookup lookup;
     private String number;
-    
+
+    public Condition(){
+
+    }
+
+    protected Condition(Parcel in) {
+        id = in.readLong();
+        ruleId = in.readLong();
+        lookup = ConditionLookup.valueOf(in.readString());
+        number = in.readString();
+    }
+
+    public static final Creator<Condition> CREATOR = new Creator<Condition>() {
+        @Override
+        public Condition createFromParcel(Parcel in) {
+            return new Condition(in);
+        }
+
+        @Override
+        public Condition[] newArray(int size) {
+            return new Condition[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeLong(ruleId);
+        dest.writeString(lookup.name());
+        dest.writeString(number);
+    }
+
     public Long getId() {
         return id;
     }

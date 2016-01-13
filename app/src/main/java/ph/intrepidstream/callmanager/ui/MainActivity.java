@@ -3,11 +3,14 @@ package ph.intrepidstream.callmanager.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,12 +22,29 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
+import ph.intrepidstream.callmanager.db.CallManagerDatabaseContract;
+import ph.intrepidstream.callmanager.db.DBHelper;
+import ph.intrepidstream.callmanager.dto.Condition;
+import ph.intrepidstream.callmanager.dto.Rule;
 import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
+import ph.intrepidstream.callmanager.util.ConditionLookup;
+import ph.intrepidstream.callmanager.util.RuleState;
 
 public class MainActivity extends AppCompatActivity {
+
+    public final static String EXTRA_EDIT_RULE = "ph.intrepidstream.callmanager.ui.EDIT_RULE";
+    public final static int ADD_EDIT_RULE_REQUEST = 1;
+
+    private final String TAG = MainActivity.class.getName();
+
     private boolean isServiceEnabled;
+    private ExpandableBlockListViewAdapter rulesAdapter;
 
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
@@ -106,7 +126,62 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupExpandableListView(ExpandableListView expandableListView) {
-        expandableListView.setAdapter(new ExpandableBlockListViewAdapter(this));
+        rulesAdapter = new ExpandableBlockListViewAdapter(this, retrieveRules());
+        expandableListView.setAdapter(rulesAdapter);
+    }
+
+    private List<Rule> retrieveRules() {
+        List<Rule> rules = new ArrayList<>();
+        DBHelper dbHelper = new DBHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED};
+        String sortOrder = CallManagerDatabaseContract.RuleEntry._ID;
+        Cursor cursor = db.query(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, columns, null, null, null, null, sortOrder);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Rule rule = new Rule();
+                rule.setId(cursor.getLong(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry._ID)));
+                rule.setName(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME)));
+                rule.setState(RuleState.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE))));
+                rule.setIsAppGenerated(cursor.getInt(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED)) != 0);
+                rule.setConditions(retrieveConditions(rule.getId(), db));
+                rules.add(rule);
+
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "Retrieved Rule: " + rule.toString());
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return rules;
+    }
+
+    private List<Condition> retrieveConditions(Long ruleId, SQLiteDatabase db) {
+        List<Condition> conditions = new ArrayList<>();
+        String[] columns = {CallManagerDatabaseContract.ConditionEntry._ID, CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_RULE_ID, CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_LOOKUP, CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_NUMBER};
+        String whereClause = CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_RULE_ID + "=?";
+        String[] whereClauseArgs = {ruleId.toString()};
+        String sortOrder = CallManagerDatabaseContract.ConditionEntry._ID;
+        Cursor cursor = db.query(CallManagerDatabaseContract.ConditionEntry.TABLE_NAME, columns, whereClause, whereClauseArgs, null, null, sortOrder);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Condition condition = new Condition();
+                condition.setId(cursor.getLong(cursor.getColumnIndex(CallManagerDatabaseContract.ConditionEntry._ID)));
+                condition.setRuleId(cursor.getLong(cursor.getColumnIndex(CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_RULE_ID)));
+                condition.setLookup(ConditionLookup.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_LOOKUP))));
+                condition.setNumber(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_NUMBER)));
+                conditions.add(condition);
+
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "Retrieved Condition: " + condition.toString());
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return conditions;
     }
 
     private void setupFloatingActionButton(FloatingActionButton floatingActionButton) {
@@ -114,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent addRuleIntent = new Intent(v.getContext(), AddRuleActivity.class);
-                startActivity(addRuleIntent);
+                startActivityForResult(addRuleIntent, ADD_EDIT_RULE_REQUEST);
             }
         });
     }
@@ -126,6 +201,21 @@ public class MainActivity extends AppCompatActivity {
             startService(intent);
         } else {
             stopService(intent);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ADD_EDIT_RULE_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                rulesAdapter.setRules(retrieveRules());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        rulesAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
         }
     }
 

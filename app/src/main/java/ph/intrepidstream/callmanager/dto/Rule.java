@@ -1,5 +1,8 @@
 package ph.intrepidstream.callmanager.dto;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -8,12 +11,50 @@ import java.util.List;
 
 import ph.intrepidstream.callmanager.util.RuleState;
 
-public class Rule {
+public class Rule implements Parcelable {
     private Long id;
     private String name;
     private RuleState state;
     private boolean isAppGenerated;
     private List<Condition> conditions;
+
+    public Rule() {
+
+    }
+
+    protected Rule(Parcel in) {
+        id = in.readLong();
+        name = in.readString();
+        state = RuleState.valueOf(in.readString());
+        isAppGenerated = in.readInt() != 0;
+        in.readList(conditions, Condition.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<Rule> CREATOR = new Creator<Rule>() {
+        @Override
+        public Rule createFromParcel(Parcel source) {
+            return new Rule(source);
+        }
+
+        @Override
+        public Rule[] newArray(int size) {
+            return new Rule[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(name);
+        dest.writeString(state.name());
+        dest.writeInt(isAppGenerated ? 1 : 0);
+        dest.writeList(conditions);
+    }
 
     public Long getId() {
         return id;
@@ -90,4 +131,5 @@ public class Rule {
                 .append("isAppGenerated", isAppGenerated)
                 .toString();
     }
+
 }

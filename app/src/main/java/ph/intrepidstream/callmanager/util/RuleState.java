@@ -10,10 +10,6 @@ public enum RuleState {
         this.displayText = displayText;
     }
 
-    public String getDisplayText() {
-        return displayText;
-    }
-
     public static RuleState findByDisplayText(String displayText) {
         for (RuleState ruleState : values()) {
             if (displayText.equals(ruleState.displayText)) {
@@ -21,5 +17,10 @@ public enum RuleState {
             }
         }
         throw new IllegalArgumentException("No value for the given argument.");
+    }
+
+    @Override
+    public String toString() {
+        return displayText;
     }
 }
