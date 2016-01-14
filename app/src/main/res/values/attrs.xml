@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MultiStateToggleButton">
+        <attr name="borderColor" format="color" />
+        <attr name="backgroundColor" format="color" />
+        <attr name="highlightColor" format="color" />
+        <attr name="textDefaultColor" format="color" />
+        <attr name="textHighlightColor" format="color" />
+
+        <attr name="borderSize" format="dimension" />
+        <attr name="textSize" format="dimension" />
+
+        <attr name="innerPadX" format="dimension" />
+        <attr name="innerPadY" format="dimension" />
+        <attr name="horizontalGap" format="dimension" />
+
+        <attr name="states" format="reference" />
+    </declare-styleable>
+</resources>

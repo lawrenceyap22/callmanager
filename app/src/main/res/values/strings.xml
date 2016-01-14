@@ -34,6 +34,14 @@
     <string name="extelcom_prefixes">0973,0974</string>
     <string name="next_mobile_prefixes">0978,0979</string>
     <string name="roaming_prefixes">00</string>
+
+    <!-- Labels for Off, Warn, Block States -->
+    <string-array name="toggle_button_values">
+        <item>Off</item>
+        <item>Warn</item>
+        <item>Block</item>
+    </string-array>
+
     <!-- -
         This is an ad unit ID for a banner test ad. Replace with your own banner ad unit id.
         For more information, see https://support.google.com/admob/answer/3052638

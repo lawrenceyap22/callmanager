@@ -12,6 +12,7 @@ import java.util.List;
 import ph.intrepidstream.callmanager.R;
 import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
+import ph.intrepidstream.callmanager.ui.custom.MultiStateToggleButton;
 
 public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
 
@@ -70,8 +71,12 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
             convertView = layoutInflater.inflate(R.layout.blocklist_group, null);
         }
 
+        Rule rule = (Rule) getGroup(groupPosition);
         TextView textView = (TextView) convertView.findViewById(R.id.blocklist_group_name_textview);
-        textView.setText(((Rule) getGroup(groupPosition)).getName());
+        textView.setText(rule.getName());
+
+        MultiStateToggleButton multiStateToggleButton = (MultiStateToggleButton) convertView.findViewById(R.id.blocklist_group_state_toggle);
+        multiStateToggleButton.setCurrentState(rule.getState().ordinal()); // TODO: Replace ordinal() with something else
 
         return convertView;
     }
