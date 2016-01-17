@@ -15,6 +15,8 @@
     <string name="add_rule_discard_changes">Discard your changes?</string>
     <string name="add_rule_name_required">Rule name is required.</string>
     <string name="add_rule_condition_required">At least one condition is required for this rule.</string>
+    <string name="delete_rule_warning_no_conditions">No conditions added. This rule will be deleted instead.</string>
+
     <string name="preference_file_key">ph.intrepidstream.callmanager.PREFERENCE_FILE_KEY</string>
     <string name="call_manage_service_key">ph.intrepidstream.callmanager.CALL_MANAGE_SERVICE_KEY</string>
 

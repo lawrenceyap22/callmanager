@@ -27,7 +27,7 @@ public class Rule implements Parcelable {
         name = in.readString();
         state = RuleState.valueOf(in.readString());
         isAppGenerated = in.readInt() != 0;
-        in.readList(conditions, Condition.class.getClassLoader());
+        conditions = in.createTypedArrayList(Condition.CREATOR);
     }
 
     public static final Parcelable.Creator<Rule> CREATOR = new Creator<Rule>() {
@@ -53,7 +53,7 @@ public class Rule implements Parcelable {
         dest.writeString(name);
         dest.writeString(state.name());
         dest.writeInt(isAppGenerated ? 1 : 0);
-        dest.writeList(conditions);
+        dest.writeTypedList(conditions);
     }
 
     public Long getId() {

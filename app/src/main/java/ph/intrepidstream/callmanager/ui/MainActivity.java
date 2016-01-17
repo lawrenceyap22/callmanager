@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setDisplayShowTitleEnabled(false);
 
         LayoutInflater inflater = LayoutInflater.from(this);
-        View customView = inflater.inflate(R.layout.custom_actionbar, null);
+        View customView = inflater.inflate(R.layout.actionbar_custom, null);
 
         actionBar.setCustomView(customView);
         actionBar.setDisplayShowCustomEnabled(true);
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
 
     private List<Rule> retrieveRules() {
         List<Rule> rules = new ArrayList<>();
-        DBHelper dbHelper = new DBHelper(this);
+        DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED};
@@ -225,6 +225,16 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(getString(R.string.call_manage_service_key), isServiceEnabled);
         editor.apply();
+
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Closing Database");
+        }
+        DBHelper.getInstance(this).close();
+        super.onDestroy();
     }
 }

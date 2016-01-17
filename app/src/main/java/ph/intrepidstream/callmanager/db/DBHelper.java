@@ -21,9 +21,17 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private final String TAG = DBHelper.class.getName();
 
+    private static DBHelper instance = null;
     private Context context;
 
-    public DBHelper(Context context) {
+    public static synchronized DBHelper getInstance(Context context) {
+        if (instance == null) {
+            instance = new DBHelper(context.getApplicationContext());
+        }
+        return instance;
+    }
+
+    private DBHelper(Context context) {
         super(context, CallManagerDatabaseContract.DATABASE_NAME, null, CallManagerDatabaseContract.DATABASE_VERSION);
         this.context = context;
     }

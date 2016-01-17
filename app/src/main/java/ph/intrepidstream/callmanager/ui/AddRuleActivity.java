@@ -69,7 +69,7 @@ public class AddRuleActivity extends AppCompatActivity {
         actionBar.setDisplayShowTitleEnabled(false);
 
         LayoutInflater layoutInflater = LayoutInflater.from(this);
-        View view = layoutInflater.inflate(R.layout.custom_actionbar_add_rule, null);
+        View view = layoutInflater.inflate(R.layout.actionbar_add_rule_custom, null);
 
         actionBar.setCustomView(view);
         actionBar.setDisplayShowCustomEnabled(true);
@@ -107,7 +107,6 @@ public class AddRuleActivity extends AppCompatActivity {
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -121,7 +120,6 @@ public class AddRuleActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
     }
@@ -151,14 +149,51 @@ public class AddRuleActivity extends AppCompatActivity {
     }
 
     public void saveRule(View view) {
-        if (isValidInputFields()) {
-            insertRule();
-            setResult(RESULT_OK);
-            finish();
+        if (rule != null) {
+            updateOrDeleteRule();
+        } else {
+            if (isValidToInsert()) {
+                insertRule();
+                done();
+            }
         }
     }
 
-    private boolean isValidInputFields() {
+    private void done() {
+        setResult(RESULT_OK);
+        finish();
+    }
+
+    private void updateOrDeleteRule() {
+        if (startsWithRuleItems.isEmpty() && equalsRuleItems.isEmpty()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.delete_rule_warning_no_conditions)
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            deleteRuleAndConditions();
+                            dialog.cancel();
+                            done();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        } else if (!nameEditText.getText().toString().isEmpty()) {
+            updateRule();
+            done();
+        } else {
+            nameEditText.setError(getString(R.string.add_rule_name_required));
+        }
+    }
+
+    private boolean isValidToInsert() {
         boolean valid = true;
         if (nameEditText.getText().toString().isEmpty()) {
             nameEditText.setError(getString(R.string.add_rule_name_required));
@@ -174,7 +209,7 @@ public class AddRuleActivity extends AppCompatActivity {
     }
 
     private void insertRule() {
-        DBHelper dbHelper = new DBHelper(this);
+        DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         Long newId;
 
@@ -190,7 +225,7 @@ public class AddRuleActivity extends AppCompatActivity {
             while (!hasError && itemViewIterator.hasNext()) {
                 contentValues = new ContentValues();
                 contentValues.put(ConditionEntry.COLUMN_NAME_RULE_ID, newId);
-                contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, ConditionLookup.findByDisplayText(startsWithSpinner.getSelectedItem().toString()).name());
+                contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, getConditionLookup(startsWithSpinner).name());
                 contentValues.put(ConditionEntry.COLUMN_NAME_NUMBER, itemViewIterator.next().getText());
                 if (db.insert(ConditionEntry.TABLE_NAME, null, contentValues) == -1) {
                     hasError = true;
@@ -202,7 +237,7 @@ public class AddRuleActivity extends AppCompatActivity {
                 while (!hasError && itemViewIterator.hasNext()) {
                     contentValues = new ContentValues();
                     contentValues.put(ConditionEntry.COLUMN_NAME_RULE_ID, newId);
-                    contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, ConditionLookup.findByDisplayText(equalsSpinner.getSelectedItem().toString()).name());
+                    contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, getConditionLookup(equalsSpinner).name());
                     contentValues.put(ConditionEntry.COLUMN_NAME_NUMBER, itemViewIterator.next().getText());
                     if (db.insert(ConditionEntry.TABLE_NAME, null, contentValues) == -1) {
                         hasError = true;
@@ -218,6 +253,99 @@ public class AddRuleActivity extends AppCompatActivity {
             }
         }
         db.endTransaction();
+    }
+
+    private void updateRule() {
+        boolean hasError = false;
+        DBHelper dbHelper = DBHelper.getInstance(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        db.beginTransaction();
+        if (!nameEditText.getText().toString().equals(rule.getName())) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(RuleEntry.COLUMN_NAME_NAME, nameEditText.getText().toString());
+            String whereClause = RuleEntry._ID + "=?";
+            String[] whereClauseArgs = new String[]{rule.getId().toString()};
+
+            if (db.update(RuleEntry.TABLE_NAME, contentValues, whereClause, whereClauseArgs) == 0) {
+                hasError = true;
+            }
+        }
+
+        if (!hasError) {
+            List<String> startsWithNumbers = new ArrayList<>(startsWithRuleItems.size());
+            for (RuleItemView itemView : startsWithRuleItems) {
+                startsWithNumbers.add(itemView.getText());
+            }
+
+            List<String> equalsNumbers = new ArrayList<>(equalsRuleItems.size());
+            for (RuleItemView itemView : equalsRuleItems) {
+                equalsNumbers.add(itemView.getText());
+            }
+
+            Condition oldCondition;
+            Iterator<Condition> conditionIterator = rule.getConditions().iterator();
+            while (!hasError && conditionIterator.hasNext()) {
+                oldCondition = conditionIterator.next();
+                if (oldCondition.getLookup() == ConditionLookup.STARTS_WITH || oldCondition.getLookup() == ConditionLookup.NOT_STARTS_WITH) {
+                    hasError = updateDeleteCondition(db, oldCondition, startsWithNumbers, equalsNumbers, startsWithSpinner, equalsSpinner);
+                } else {
+                    hasError = updateDeleteCondition(db, oldCondition, equalsNumbers, startsWithNumbers, equalsSpinner, startsWithSpinner);
+                }
+            }
+            if (!hasError) {
+                db.setTransactionSuccessful();
+            }
+        }
+        db.endTransaction();
+    }
+
+    private void deleteRuleAndConditions() {
+        DBHelper dbHelper = DBHelper.getInstance(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        String ruleWhereClause = RuleEntry._ID + "=?";
+        String conditionWhereClause = ConditionEntry.COLUMN_NAME_RULE_ID + "=?";
+        String[] whereClauseArgs = {rule.getId().toString()};
+
+        db.beginTransaction();
+        if (db.delete(ConditionEntry.TABLE_NAME, conditionWhereClause, whereClauseArgs) > 0) {
+            if (db.delete(RuleEntry.TABLE_NAME, ruleWhereClause, whereClauseArgs) > 0) {
+                db.setTransactionSuccessful();
+            }
+        }
+        db.endTransaction();
+    }
+
+    private boolean updateDeleteCondition(SQLiteDatabase db, Condition oldCondition, List<String> mainListNumbers, List<String> secondaryListNumbers, Spinner mainSpinner, Spinner secondarySpinner) {
+        String whereClause = ConditionEntry._ID + "=?";
+        String[] whereClauseArgs = {oldCondition.getId().toString()};
+        boolean hasError = false;
+        if (!mainListNumbers.contains(oldCondition.getNumber())) {
+            if (secondaryListNumbers.contains(oldCondition.getNumber())) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, getConditionLookup(secondarySpinner).name());
+                if (db.update(ConditionEntry.TABLE_NAME, contentValues, whereClause, whereClauseArgs) == 0) {
+                    hasError = true;
+                }
+            } else {
+                if (db.delete(ConditionEntry.TABLE_NAME, whereClause, whereClauseArgs) == 0) {
+                    hasError = true;
+                }
+            }
+        } else {
+            if (oldCondition.getLookup() != getConditionLookup(mainSpinner)) {
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, getConditionLookup(mainSpinner).name());
+                if (db.update(ConditionEntry.TABLE_NAME, contentValues, whereClause, whereClauseArgs) == 0) {
+                    hasError = true;
+                }
+            }
+        }
+        return hasError;
+    }
+
+    private ConditionLookup getConditionLookup(Spinner spinner) {
+        return ConditionLookup.findByDisplayText(spinner.getSelectedItem().toString());
     }
 
     public void addStartsWithInput(View view) {
