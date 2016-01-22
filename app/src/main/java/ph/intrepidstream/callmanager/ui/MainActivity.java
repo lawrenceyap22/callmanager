@@ -3,7 +3,6 @@ package ph.intrepidstream.callmanager.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -22,19 +21,13 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
-import ph.intrepidstream.callmanager.db.CallManagerDatabaseContract;
+import ph.intrepidstream.callmanager.dao.RuleDao;
+import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
 import ph.intrepidstream.callmanager.db.DBHelper;
-import ph.intrepidstream.callmanager.dto.Condition;
-import ph.intrepidstream.callmanager.dto.Rule;
 import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
-import ph.intrepidstream.callmanager.util.ConditionLookup;
-import ph.intrepidstream.callmanager.util.RuleState;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isServiceEnabled;
     private ExpandableBlockListViewAdapter rulesAdapter;
+    private RuleDao ruleDao;
 
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
@@ -54,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ruleDao = RuleDaoImpl.getInstance();
 
         ActionBar actionBar = getSupportActionBar();
         setupCustomActionBar(actionBar);
@@ -126,62 +122,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupExpandableListView(ExpandableListView expandableListView) {
-        rulesAdapter = new ExpandableBlockListViewAdapter(this, retrieveRules());
-        expandableListView.setAdapter(rulesAdapter);
-    }
-
-    private List<Rule> retrieveRules() {
-        List<Rule> rules = new ArrayList<>();
         DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED};
-        String sortOrder = CallManagerDatabaseContract.RuleEntry._ID;
-        Cursor cursor = db.query(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, columns, null, null, null, null, sortOrder);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Rule rule = new Rule();
-                rule.setId(cursor.getLong(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry._ID)));
-                rule.setName(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME)));
-                rule.setState(RuleState.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE))));
-                rule.setIsAppGenerated(cursor.getInt(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED)) != 0);
-                rule.setConditions(retrieveConditions(rule.getId(), db));
-                rules.add(rule);
-
-                if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Retrieved Rule: " + rule.toString());
-                }
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return rules;
-    }
-
-    private List<Condition> retrieveConditions(Long ruleId, SQLiteDatabase db) {
-        List<Condition> conditions = new ArrayList<>();
-        String[] columns = {CallManagerDatabaseContract.ConditionEntry._ID, CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_RULE_ID, CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_LOOKUP, CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_NUMBER};
-        String whereClause = CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_RULE_ID + "=?";
-        String[] whereClauseArgs = {ruleId.toString()};
-        String sortOrder = CallManagerDatabaseContract.ConditionEntry._ID;
-        Cursor cursor = db.query(CallManagerDatabaseContract.ConditionEntry.TABLE_NAME, columns, whereClause, whereClauseArgs, null, null, sortOrder);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Condition condition = new Condition();
-                condition.setId(cursor.getLong(cursor.getColumnIndex(CallManagerDatabaseContract.ConditionEntry._ID)));
-                condition.setRuleId(cursor.getLong(cursor.getColumnIndex(CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_RULE_ID)));
-                condition.setLookup(ConditionLookup.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_LOOKUP))));
-                condition.setNumber(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.ConditionEntry.COLUMN_NAME_NUMBER)));
-                conditions.add(condition);
-
-                if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Retrieved Condition: " + condition.toString());
-                }
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return conditions;
+        rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRules(db));
+        expandableListView.setAdapter(rulesAdapter);
     }
 
     private void setupFloatingActionButton(FloatingActionButton floatingActionButton) {
@@ -208,7 +152,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ADD_EDIT_RULE_REQUEST) {
             if (resultCode == RESULT_OK) {
-                rulesAdapter.setRules(retrieveRules());
+                DBHelper dbHelper = DBHelper.getInstance(this);
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                rulesAdapter.setRules(ruleDao.retrieveRules(db));
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

@@ -1,7 +1,6 @@
 package ph.intrepidstream.callmanager.ui;
 
 import android.app.AlertDialog;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -20,24 +19,22 @@ import android.widget.Spinner;
 import org.apmem.tools.layouts.FlowLayout;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
+import ph.intrepidstream.callmanager.dao.RuleDao;
+import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
 import ph.intrepidstream.callmanager.db.DBHelper;
 import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
 import ph.intrepidstream.callmanager.util.ConditionLookup;
-import ph.intrepidstream.callmanager.util.RuleState;
-
-import static ph.intrepidstream.callmanager.db.CallManagerDatabaseContract.ConditionEntry;
-import static ph.intrepidstream.callmanager.db.CallManagerDatabaseContract.RuleEntry;
 
 public class AddRuleActivity extends AppCompatActivity {
 
     private final String TAG = AddRuleActivity.class.getName();
 
+    private RuleDao ruleDao;
     private EditText nameEditText;
     private Spinner startsWithSpinner;
     private EditText startsWithText;
@@ -53,6 +50,8 @@ public class AddRuleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_rule);
+
+        ruleDao = RuleDaoImpl.getInstance();
 
         ActionBar actionBar = getSupportActionBar();
         initCustomActionBar(actionBar);
@@ -131,16 +130,16 @@ public class AddRuleActivity extends AppCompatActivity {
             for (Condition condition : rule.getConditions()) {
                 if (condition.getLookup() == ConditionLookup.STARTS_WITH || condition.getLookup() == ConditionLookup.NOT_STARTS_WITH) {
                     startsWithSpinner.setSelection(condition.getLookup() == ConditionLookup.STARTS_WITH ? 0 : 1);
-                    addRuleItem(condition.getNumber(), startsWithLayout, startsWithRuleItems);
+                    addRuleItemEdit(condition.getNumber(), startsWithLayout, startsWithRuleItems);
                 } else {
                     equalsSpinner.setSelection(condition.getLookup() == ConditionLookup.EQUALS ? 0 : 1);
-                    addRuleItem(condition.getNumber(), equalsLayout, equalsRuleItems);
+                    addRuleItemEdit(condition.getNumber(), equalsLayout, equalsRuleItems);
                 }
             }
         }
     }
 
-    private void addRuleItem(String input, FlowLayout parentLayout, List<RuleItemView> itemList) {
+    private void addRuleItemEdit(String input, FlowLayout parentLayout, List<RuleItemView> itemList) {
         RuleItemView ruleItem = new RuleItemView(this, input, itemList, parentLayout);
         if (!itemList.contains(ruleItem)) {
             itemList.add(ruleItem);
@@ -211,91 +210,36 @@ public class AddRuleActivity extends AppCompatActivity {
     private void insertRule() {
         DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        Long newId;
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(RuleEntry.COLUMN_NAME_NAME, nameEditText.getText().toString());
-        contentValues.put(RuleEntry.COLUMN_NAME_STATE, RuleState.OFF.name());
-        contentValues.put(RuleEntry.COLUMN_NAME_APP_GENERATED, true);
+        rule = new Rule();
+        rule.setName(nameEditText.getText().toString());
+        rule.setIsAppGenerated(false);
+        rule.setConditions(getAllConditions(rule.getId()));
+
         db.beginTransaction();
-        newId = db.insert(RuleEntry.TABLE_NAME, null, contentValues);
-        if (newId != -1) {
-            boolean hasError = false;
-            Iterator<RuleItemView> itemViewIterator = startsWithRuleItems.iterator();
-            while (!hasError && itemViewIterator.hasNext()) {
-                contentValues = new ContentValues();
-                contentValues.put(ConditionEntry.COLUMN_NAME_RULE_ID, newId);
-                contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, getConditionLookup(startsWithSpinner).name());
-                contentValues.put(ConditionEntry.COLUMN_NAME_NUMBER, itemViewIterator.next().getText());
-                if (db.insert(ConditionEntry.TABLE_NAME, null, contentValues) == -1) {
-                    hasError = true;
-                }
+        if (ruleDao.insertRule(db, rule) != -1) {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, rule.getName() + " inserted successfully.");
             }
-
-            if (!hasError) {
-                itemViewIterator = equalsRuleItems.iterator();
-                while (!hasError && itemViewIterator.hasNext()) {
-                    contentValues = new ContentValues();
-                    contentValues.put(ConditionEntry.COLUMN_NAME_RULE_ID, newId);
-                    contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, getConditionLookup(equalsSpinner).name());
-                    contentValues.put(ConditionEntry.COLUMN_NAME_NUMBER, itemViewIterator.next().getText());
-                    if (db.insert(ConditionEntry.TABLE_NAME, null, contentValues) == -1) {
-                        hasError = true;
-                    }
-                }
-
-                if (!hasError) {
-                    if (BuildConfig.DEBUG) {
-                        Log.d(TAG, nameEditText.getText().toString() + " inserted successfully.");
-                    }
-                    db.setTransactionSuccessful();
-                }
-            }
+            db.setTransactionSuccessful();
         }
         db.endTransaction();
     }
 
     private void updateRule() {
-        boolean hasError = false;
         DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
+        Rule newRule = new Rule();
+        newRule.setName(nameEditText.getText().toString());
+        newRule.setConditions(getAllConditions(rule.getId()));
+
         db.beginTransaction();
-        if (!nameEditText.getText().toString().equals(rule.getName())) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(RuleEntry.COLUMN_NAME_NAME, nameEditText.getText().toString());
-            String whereClause = RuleEntry._ID + "=?";
-            String[] whereClauseArgs = new String[]{rule.getId().toString()};
-
-            if (db.update(RuleEntry.TABLE_NAME, contentValues, whereClause, whereClauseArgs) == 0) {
-                hasError = true;
+        if (ruleDao.updateRule(db, rule, newRule)) {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Rule updated successfully.");
             }
-        }
-
-        if (!hasError) {
-            List<String> startsWithNumbers = new ArrayList<>(startsWithRuleItems.size());
-            for (RuleItemView itemView : startsWithRuleItems) {
-                startsWithNumbers.add(itemView.getText());
-            }
-
-            List<String> equalsNumbers = new ArrayList<>(equalsRuleItems.size());
-            for (RuleItemView itemView : equalsRuleItems) {
-                equalsNumbers.add(itemView.getText());
-            }
-
-            Condition oldCondition;
-            Iterator<Condition> conditionIterator = rule.getConditions().iterator();
-            while (!hasError && conditionIterator.hasNext()) {
-                oldCondition = conditionIterator.next();
-                if (oldCondition.getLookup() == ConditionLookup.STARTS_WITH || oldCondition.getLookup() == ConditionLookup.NOT_STARTS_WITH) {
-                    hasError = updateDeleteCondition(db, oldCondition, startsWithNumbers, equalsNumbers, startsWithSpinner, equalsSpinner);
-                } else {
-                    hasError = updateDeleteCondition(db, oldCondition, equalsNumbers, startsWithNumbers, equalsSpinner, startsWithSpinner);
-                }
-            }
-            if (!hasError) {
-                db.setTransactionSuccessful();
-            }
+            db.setTransactionSuccessful();
         }
         db.endTransaction();
     }
@@ -303,45 +247,40 @@ public class AddRuleActivity extends AppCompatActivity {
     private void deleteRuleAndConditions() {
         DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String ruleWhereClause = RuleEntry._ID + "=?";
-        String conditionWhereClause = ConditionEntry.COLUMN_NAME_RULE_ID + "=?";
-        String[] whereClauseArgs = {rule.getId().toString()};
 
         db.beginTransaction();
-        if (db.delete(ConditionEntry.TABLE_NAME, conditionWhereClause, whereClauseArgs) > 0) {
-            if (db.delete(RuleEntry.TABLE_NAME, ruleWhereClause, whereClauseArgs) > 0) {
-                db.setTransactionSuccessful();
+        if (ruleDao.deleteRule(db, rule.getId()) > 0) {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Rule deleted successfully.");
             }
+            db.setTransactionSuccessful();
         }
         db.endTransaction();
     }
 
-    private boolean updateDeleteCondition(SQLiteDatabase db, Condition oldCondition, List<String> mainListNumbers, List<String> secondaryListNumbers, Spinner mainSpinner, Spinner secondarySpinner) {
-        String whereClause = ConditionEntry._ID + "=?";
-        String[] whereClauseArgs = {oldCondition.getId().toString()};
-        boolean hasError = false;
-        if (!mainListNumbers.contains(oldCondition.getNumber())) {
-            if (secondaryListNumbers.contains(oldCondition.getNumber())) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, getConditionLookup(secondarySpinner).name());
-                if (db.update(ConditionEntry.TABLE_NAME, contentValues, whereClause, whereClauseArgs) == 0) {
-                    hasError = true;
-                }
-            } else {
-                if (db.delete(ConditionEntry.TABLE_NAME, whereClause, whereClauseArgs) == 0) {
-                    hasError = true;
-                }
+    private List<Condition> getAllConditions(Long ruleId) {
+        List<Condition> conditions = new ArrayList<>(startsWithRuleItems.size() + equalsRuleItems.size());
+        Condition condition;
+        for (RuleItemView itemView : startsWithRuleItems) {
+            condition = new Condition();
+            if (ruleId != null) {
+                condition.setRuleId(ruleId);
             }
-        } else {
-            if (oldCondition.getLookup() != getConditionLookup(mainSpinner)) {
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, getConditionLookup(mainSpinner).name());
-                if (db.update(ConditionEntry.TABLE_NAME, contentValues, whereClause, whereClauseArgs) == 0) {
-                    hasError = true;
-                }
-            }
+            condition.setLookup(getConditionLookup(startsWithSpinner));
+            condition.setNumber(itemView.getText());
+            conditions.add(condition);
         }
-        return hasError;
+
+        for (RuleItemView itemView : equalsRuleItems) {
+            condition = new Condition();
+            if (ruleId != null) {
+                condition.setRuleId(ruleId);
+            }
+            condition.setLookup(getConditionLookup(equalsSpinner));
+            condition.setNumber(itemView.getText());
+            conditions.add(condition);
+        }
+        return conditions;
     }
 
     private ConditionLookup getConditionLookup(Spinner spinner) {
@@ -349,15 +288,23 @@ public class AddRuleActivity extends AppCompatActivity {
     }
 
     public void addStartsWithInput(View view) {
-        String input = startsWithText.getText().toString();
-        addRuleItem(input, startsWithLayout, startsWithRuleItems);
-        startsWithText.setText("");
+        addRuleItem(startsWithText, startsWithLayout, startsWithRuleItems, equalsRuleItems);
     }
 
     public void addEqualsInput(View view) {
-        String input = equalsText.getText().toString();
-        addRuleItem(input, equalsLayout, equalsRuleItems);
-        equalsText.setText("");
+        addRuleItem(equalsText, equalsLayout, equalsRuleItems, startsWithRuleItems);
+    }
+
+    private void addRuleItem(EditText editText, FlowLayout parentLayout, List<RuleItemView> itemList, List<RuleItemView> secondaryItemList) {
+        String input = editText.getText().toString();
+        RuleItemView ruleItem = new RuleItemView(this, input, itemList, parentLayout);
+        if (!itemList.contains(ruleItem) && !secondaryItemList.contains(ruleItem)) {
+            itemList.add(ruleItem);
+            parentLayout.addView(ruleItem.getView());
+            editText.setText("");
+        } else {
+            editText.setError(getString(R.string.add_rule_duplicate_number));
+        }
     }
 
     public void close(View view) {

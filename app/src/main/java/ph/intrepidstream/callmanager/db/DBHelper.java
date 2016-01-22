@@ -6,11 +6,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
+import ph.intrepidstream.callmanager.dao.RuleDao;
+import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
+import ph.intrepidstream.callmanager.dto.Condition;
+import ph.intrepidstream.callmanager.dto.Rule;
 import ph.intrepidstream.callmanager.util.ConditionLookup;
 import ph.intrepidstream.callmanager.util.RuleState;
 
@@ -44,10 +50,10 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private void initializeDefaultData(SQLiteDatabase db) {
-        ContentValues contentValues;
-        Long newId;
-        boolean hasError;
-        int numberCtr;
+        RuleDao ruleDao = RuleDaoImpl.getInstance();
+        Rule rule;
+        Condition condition;
+        List<Condition> conditions;
         String[] numbers;
 
         Map<String, String[]> defaultData = new LinkedHashMap<>(6);
@@ -59,35 +65,25 @@ public class DBHelper extends SQLiteOpenHelper {
         defaultData.put(context.getString(R.string.roaming_numbers), context.getString(R.string.roaming_prefixes).split(","));
 
         for (Map.Entry<String, String[]> defaultDataEntry : defaultData.entrySet()) {
-            contentValues = new ContentValues();
-            contentValues.put(RuleEntry.COLUMN_NAME_NAME, defaultDataEntry.getKey());
-            contentValues.put(RuleEntry.COLUMN_NAME_STATE, RuleState.OFF.name());
-            contentValues.put(RuleEntry.COLUMN_NAME_APP_GENERATED, true);
+            rule = new Rule();
+            numbers = defaultDataEntry.getValue();
+            conditions = new ArrayList<>(numbers.length);
+            for (String number : numbers) {
+                condition = new Condition();
+                condition.setLookup(ConditionLookup.STARTS_WITH);
+                condition.setNumber(number);
+                conditions.add(condition);
+            }
+            rule.setName(defaultDataEntry.getKey());
+            rule.setIsAppGenerated(true);
+            rule.setConditions(conditions);
 
             db.beginTransaction();
-            newId = db.insert(RuleEntry.TABLE_NAME, null, contentValues);
-            if (newId != -1) {
-                hasError = false;
-                numberCtr = 0;
-                numbers = defaultDataEntry.getValue();
-                while (!hasError && numberCtr < numbers.length) {
-                    contentValues = new ContentValues();
-                    contentValues.put(ConditionEntry.COLUMN_NAME_RULE_ID, newId);
-                    contentValues.put(ConditionEntry.COLUMN_NAME_LOOKUP, ConditionLookup.STARTS_WITH.name());
-                    contentValues.put(ConditionEntry.COLUMN_NAME_NUMBER, numbers[numberCtr]);
-
-                    if (db.insert(ConditionEntry.TABLE_NAME, null, contentValues) == -1) {
-                        hasError = true;
-                    }
-                    numberCtr++;
+            if (ruleDao.insertRule(db, rule) != -1) {
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, rule.getName() + " inserted successfully.");
                 }
-
-                if (!hasError) {
-                    if (BuildConfig.DEBUG) {
-                        Log.d(TAG, "Default data " + defaultDataEntry.getKey() + " inserted successfully.");
-                    }
-                    db.setTransactionSuccessful();
-                }
+                db.setTransactionSuccessful();
             }
             db.endTransaction();
         }
