@@ -10,7 +10,7 @@
     <string name="add_rule_title">Add Rule</string>
     <string name="add_rule_save">Save</string>
     <string name="add_rule_name_hint">Name</string>
-    <string name="add_rule_rules_label">Rules:</string>
+    <string name="add_rule_rules_label">Prefixes:</string>
     <string name="add_rule_number_hint">Number</string>
     <string name="add_rule_discard_changes">Discard your changes?</string>
     <string name="add_rule_name_required">Rule name is required.</string>

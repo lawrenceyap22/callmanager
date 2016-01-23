@@ -12,8 +12,6 @@ public interface ConditionDao {
 
     long insertCondition(SQLiteDatabase db, Condition condition);
 
-    int updateCondition(SQLiteDatabase db, Condition condition);
-
     boolean updateConditionsByRule(SQLiteDatabase db, List<Condition> oldConditions, List<Condition> newConditions);
 
     int deleteCondition(SQLiteDatabase db, Long id);

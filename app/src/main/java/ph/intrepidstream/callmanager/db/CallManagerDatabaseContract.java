@@ -34,13 +34,11 @@ public final class CallManagerDatabaseContract {
     public static abstract class ConditionEntry implements BaseColumns {
         public static final String TABLE_NAME = "condition";
         public static final String COLUMN_NAME_RULE_ID = "rule_id";
-        public static final String COLUMN_NAME_LOOKUP = "lookup"; //starts with, equals, not starts with, not equals
         public static final String COLUMN_NAME_NUMBER = "number";
 
         public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ("
                 + _ID + INTEGER_TYPE + " PRIMARY KEY AUTOINCREMENT" + COMMA_SEP
                 + COLUMN_NAME_RULE_ID + INTEGER_TYPE + COMMA_SEP
-                + COLUMN_NAME_LOOKUP + TEXT_TYPE + NOT_NULL + COMMA_SEP
                 + COLUMN_NAME_NUMBER + TEXT_TYPE + NOT_NULL + COMMA_SEP
                 + "FOREIGN KEY(" + COLUMN_NAME_RULE_ID + ") REFERENCES " + RuleEntry.TABLE_NAME + "(" + RuleEntry._ID + "))";
 

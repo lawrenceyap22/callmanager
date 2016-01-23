@@ -52,7 +52,7 @@ public class MultiStateToggleButton extends View {
     public MultiStateToggleButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        stateChangedListeners = new ArrayList<OnStateChangedListener>();
+        stateChangedListeners = new ArrayList<>();
 
         initXMLAttributes(context, attrs);
         initDrawing();
@@ -101,11 +101,11 @@ public class MultiStateToggleButton extends View {
             innerPadY = a.getDimensionPixelSize(R.styleable.MultiStateToggleButton_innerPadY, 0);
             horizontalGap = a.getDimensionPixelSize(R.styleable.MultiStateToggleButton_horizontalGap, 0);
 
-            states = new ArrayList<String>();
+            states = new ArrayList<>();
             CharSequence[] statesArray = a.getTextArray(R.styleable.MultiStateToggleButton_states);
             if (statesArray != null) {
-                for (int i = 0; i < statesArray.length; i++) {
-                    states.add(statesArray[i].toString());
+                for (CharSequence state : statesArray) {
+                    states.add(state.toString());
                 }
             }
         } finally {
@@ -149,7 +149,7 @@ public class MultiStateToggleButton extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (textBoundsList == null) {
-            textBoundsList = new ArrayList<Rect>();
+            textBoundsList = new ArrayList<>();
         }
         textBoundsList.clear();
 
@@ -232,7 +232,7 @@ public class MultiStateToggleButton extends View {
         invalidate();
         requestLayout();
 
-        for(OnStateChangedListener listener: stateChangedListeners) {
+        for (OnStateChangedListener listener : stateChangedListeners) {
             listener.onStateChanged(oldState, newState);
         }
     }
@@ -242,6 +242,6 @@ public class MultiStateToggleButton extends View {
     }
 
     public interface OnStateChangedListener {
-        public void onStateChanged(int oldState, int newState);
+        void onStateChanged(int oldState, int newState);
     }
 }

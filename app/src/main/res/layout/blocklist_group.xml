@@ -6,45 +6,31 @@
     android:baselineAligned="false"
     android:minHeight="50dp"
     android:orientation="horizontal"
-    android:paddingLeft="40dp"
+    android:paddingEnd="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="40dp"
     android:paddingStart="40dp">
 
-    <!-- TODO: Modify! -->
 
-    <RelativeLayout
+    <TextView
+        android:id="@+id/blocklist_group_name_textview"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:ellipsize="none"
+        android:singleLine="false"
+        android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/blocklist_group_name_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:ellipsize="none"
-            android:singleLine="false"
-            android:textSize="14sp" />
-
-    </RelativeLayout>
-
-
-    <RelativeLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-
-        <ph.intrepidstream.callmanager.ui.custom.MultiStateToggleButton
-            android:id="@+id/blocklist_group_state_toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            custom:borderSize="1dp"
-            custom:innerPadX="5dp"
-            custom:innerPadY="5dp"
-            custom:states="@array/toggle_button_values"
-            custom:textSize="14sp" />
-
-    </RelativeLayout>
-
+    <ph.intrepidstream.callmanager.ui.custom.MultiStateToggleButton
+        android:id="@+id/blocklist_group_state_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        custom:borderSize="1dp"
+        custom:innerPadX="5dp"
+        custom:innerPadY="5dp"
+        custom:states="@array/toggle_button_values"
+        custom:textSize="14sp" />
 
 </LinearLayout>

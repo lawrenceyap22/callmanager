@@ -7,22 +7,17 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import ph.intrepidstream.callmanager.util.ConditionLookup;
-
 public class Condition implements Parcelable {
     private Long id;
     private Long ruleId;
-    private ConditionLookup lookup;
     private String number;
 
-    public Condition(){
-
+    public Condition() {
     }
 
     protected Condition(Parcel in) {
         id = in.readLong();
         ruleId = in.readLong();
-        lookup = ConditionLookup.valueOf(in.readString());
         number = in.readString();
     }
 
@@ -47,7 +42,6 @@ public class Condition implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeLong(ruleId);
-        dest.writeString(lookup.name());
         dest.writeString(number);
     }
 
@@ -67,14 +61,6 @@ public class Condition implements Parcelable {
         this.ruleId = ruleId;
     }
 
-    public ConditionLookup getLookup() {
-        return lookup;
-    }
-
-    public void setLookup(ConditionLookup lookup) {
-        this.lookup = lookup;
-    }
-
     public String getNumber() {
         return number;
     }
@@ -92,9 +78,7 @@ public class Condition implements Parcelable {
         Condition that = (Condition) o;
 
         return new EqualsBuilder()
-                .append(id, that.id)
                 .append(ruleId, that.ruleId)
-                .append(lookup, that.lookup)
                 .append(number, that.number)
                 .isEquals();
     }
@@ -102,9 +86,7 @@ public class Condition implements Parcelable {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(id)
                 .append(ruleId)
-                .append(lookup)
                 .append(number)
                 .toHashCode();
     }
@@ -114,7 +96,6 @@ public class Condition implements Parcelable {
         return new ToStringBuilder(this)
                 .append("id", id)
                 .append("ruleId", ruleId)
-                .append("lookup", lookup)
                 .append("number", number)
                 .toString();
     }

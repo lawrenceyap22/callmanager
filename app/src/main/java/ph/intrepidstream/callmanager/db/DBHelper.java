@@ -1,6 +1,5 @@
 package ph.intrepidstream.callmanager.db;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -17,11 +16,6 @@ import ph.intrepidstream.callmanager.dao.RuleDao;
 import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
 import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
-import ph.intrepidstream.callmanager.util.ConditionLookup;
-import ph.intrepidstream.callmanager.util.RuleState;
-
-import static ph.intrepidstream.callmanager.db.CallManagerDatabaseContract.ConditionEntry;
-import static ph.intrepidstream.callmanager.db.CallManagerDatabaseContract.RuleEntry;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -70,7 +64,6 @@ public class DBHelper extends SQLiteOpenHelper {
             conditions = new ArrayList<>(numbers.length);
             for (String number : numbers) {
                 condition = new Condition();
-                condition.setLookup(ConditionLookup.STARTS_WITH);
                 condition.setNumber(number);
                 conditions.add(condition);
             }

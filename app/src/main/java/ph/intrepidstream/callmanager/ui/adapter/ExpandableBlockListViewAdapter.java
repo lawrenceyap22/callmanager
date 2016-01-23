@@ -20,7 +20,6 @@ import ph.intrepidstream.callmanager.dto.Rule;
 import ph.intrepidstream.callmanager.ui.AddRuleActivity;
 import ph.intrepidstream.callmanager.ui.MainActivity;
 import ph.intrepidstream.callmanager.ui.custom.MultiStateToggleButton;
-import ph.intrepidstream.callmanager.util.ConditionLookup;
 
 public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
 
@@ -43,7 +42,6 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-//        return rules.get(groupPosition).getConditions().size();
         return 1;
     }
 
@@ -54,7 +52,6 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-//        return rules.get(groupPosition).getConditions().get(childPosition);
         return rules.get(groupPosition).getConditions();
     }
 
@@ -65,7 +62,6 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
 
     @Override
     public long getChildId(int groupPosition, int childPosition) {
-//        return rules.get(groupPosition).getConditions().get(childPosition).getId();
         return rules.get(groupPosition).getId();
     }
 
@@ -76,7 +72,6 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        // TODO: Modify for nicer view
         if (convertView == null) {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
             convertView = layoutInflater.inflate(R.layout.blocklist_group, null);
@@ -95,33 +90,18 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(final int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         LayoutInflater layoutInflater = null;
-        boolean hasStartsWith = false;
-        boolean hasEquals = false;
         if (convertView == null) {
             layoutInflater = LayoutInflater.from(context);
             convertView = layoutInflater.inflate(R.layout.blocklist_child, null);
         }
 
         List<Condition> conditions = (List<Condition>) getChild(groupPosition, childPosition);
-        TextView number;
-        TextView startsWithLookup = (TextView) convertView.findViewById(R.id.blocklist_child_starts_with_lookup);
-        startsWithLookup.setText("");
-        startsWithLookup.setVisibility(View.GONE);
 
-        TextView equalsLookup = (TextView) convertView.findViewById(R.id.blocklist_child_equals_lookup);
-        equalsLookup.setText("");
-        equalsLookup.setVisibility(View.GONE);
+        FlowLayout numbersLayout = (FlowLayout) convertView.findViewById(R.id.blocklist_child_numbers);
+        numbersLayout.removeAllViews();
 
-        FlowLayout startsWithLayout = (FlowLayout) convertView.findViewById(R.id.blocklist_child_starts_with_conditions);
-        startsWithLayout.removeAllViews();
-        startsWithLayout.setVisibility(View.GONE);
-
-        FlowLayout equalsLayout = (FlowLayout) convertView.findViewById(R.id.blocklist_child_equals_conditions);
-        equalsLayout.removeAllViews();
-        equalsLayout.setVisibility(View.GONE);
-
-        AppCompatImageButton startsWithEditRuleBtn = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_child_starts_with_edit);
-        startsWithEditRuleBtn.setOnClickListener(new View.OnClickListener() {
+        AppCompatImageButton editButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_child_edit);
+        editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 editRule((Rule) getGroup(groupPosition));
@@ -129,6 +109,7 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         });
 
         View childView;
+        TextView number;
         for (Condition condition : conditions) {
             if (layoutInflater == null) {
                 layoutInflater = LayoutInflater.from(context);
@@ -136,32 +117,8 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
             childView = layoutInflater.inflate(R.layout.item_blocklist_child, null);
             number = (TextView) childView.findViewById(R.id.blocklist_child_number);
             number.setText(condition.getNumber());
-
-            if (condition.getLookup() == ConditionLookup.STARTS_WITH || condition.getLookup() == ConditionLookup.NOT_STARTS_WITH) {
-                if (!startsWithLookup.getText().toString().equals(condition.getLookup().toString())) {
-                    startsWithLookup.setText(condition.getLookup().toString());
-                }
-                startsWithLayout.addView(childView);
-                hasStartsWith = true;
-            } else {
-                if (!equalsLookup.getText().toString().equals(condition.getLookup().toString())) {
-                    equalsLookup.setText(condition.getLookup().toString());
-                }
-                equalsLayout.addView(childView);
-                hasEquals = true;
-            }
+            numbersLayout.addView(childView);
         }
-
-        if (hasStartsWith) {
-            startsWithLookup.setVisibility(View.VISIBLE);
-            startsWithLayout.setVisibility(View.VISIBLE);
-        }
-
-        if (hasEquals) {
-            equalsLookup.setVisibility(View.VISIBLE);
-            equalsLayout.setVisibility(View.VISIBLE);
-        }
-
         return convertView;
     }
 

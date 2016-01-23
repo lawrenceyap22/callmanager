@@ -12,9 +12,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Spinner;
 
 import org.apmem.tools.layouts.FlowLayout;
 
@@ -28,7 +26,6 @@ import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
 import ph.intrepidstream.callmanager.db.DBHelper;
 import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
-import ph.intrepidstream.callmanager.util.ConditionLookup;
 
 public class AddRuleActivity extends AppCompatActivity {
 
@@ -36,14 +33,9 @@ public class AddRuleActivity extends AppCompatActivity {
 
     private RuleDao ruleDao;
     private EditText nameEditText;
-    private Spinner startsWithSpinner;
-    private EditText startsWithText;
-    private FlowLayout startsWithLayout;
-    private List<RuleItemView> startsWithRuleItems;
-    private Spinner equalsSpinner;
-    private EditText equalsText;
-    private FlowLayout equalsLayout;
-    private List<RuleItemView> equalsRuleItems;
+    private EditText numberEditText;
+    private FlowLayout numbersLayout;
+    private List<RuleItemView> ruleItems;
     private Rule rule;
 
     @Override
@@ -51,15 +43,11 @@ public class AddRuleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_rule);
 
-        ruleDao = RuleDaoImpl.getInstance();
-
         ActionBar actionBar = getSupportActionBar();
         initCustomActionBar(actionBar);
 
-        nameEditText = (EditText) findViewById(R.id.add_rule_name);
-        initStartsWithViews();
-        initEqualsViews();
-
+        ruleDao = RuleDaoImpl.getInstance();
+        initViews();
         initViewValuesIfEdit();
     }
 
@@ -74,32 +62,14 @@ public class AddRuleActivity extends AppCompatActivity {
         actionBar.setDisplayShowCustomEnabled(true);
     }
 
-    private void initStartsWithViews() {
-        startsWithSpinner = (Spinner) findViewById(R.id.add_rule_starts_with_spinner);
-        startsWithText = (EditText) findViewById(R.id.add_rule_starts_with_text);
-        AppCompatImageButton startsWithAdd = (AppCompatImageButton) findViewById(R.id.add_rule_starts_with_add);
-        startsWithAdd.setVisibility(View.INVISIBLE);
-        startsWithLayout = (FlowLayout) findViewById(R.id.add_rule_starts_with_list);
-        startsWithRuleItems = new ArrayList<>();
-        setUpSpinner(startsWithSpinner, new String[]{ConditionLookup.STARTS_WITH.toString(), ConditionLookup.NOT_STARTS_WITH.toString()});
-        setUpTextChangedListener(startsWithText, startsWithAdd);
-    }
-
-    private void initEqualsViews() {
-        equalsSpinner = (Spinner) findViewById(R.id.add_rule_equals_spinner);
-        equalsText = (EditText) findViewById(R.id.add_rule_equals_text);
-        AppCompatImageButton equalsAdd = (AppCompatImageButton) findViewById(R.id.add_rule_equals_add);
-        equalsAdd.setVisibility(View.INVISIBLE);
-        equalsLayout = (FlowLayout) findViewById(R.id.add_rule_equals_list);
-        equalsRuleItems = new ArrayList<>();
-        setUpSpinner(equalsSpinner, new String[]{ConditionLookup.EQUALS.toString(), ConditionLookup.NOT_EQUALS.toString()});
-        setUpTextChangedListener(equalsText, equalsAdd);
-    }
-
-    private void setUpSpinner(Spinner spinner, String[] values) {
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, values);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(arrayAdapter);
+    private void initViews() {
+        nameEditText = (EditText) findViewById(R.id.add_rule_name);
+        numberEditText = (EditText) findViewById(R.id.add_rule_text);
+        AppCompatImageButton addButton = (AppCompatImageButton) findViewById(R.id.add_rule_add);
+        addButton.setVisibility(View.INVISIBLE);
+        numbersLayout = (FlowLayout) findViewById(R.id.add_rule_list);
+        ruleItems = new ArrayList<>();
+        setUpTextChangedListener(numberEditText, addButton);
     }
 
     private void setUpTextChangedListener(EditText editText, final AppCompatImageButton imageButton) {
@@ -128,22 +98,8 @@ public class AddRuleActivity extends AppCompatActivity {
         if (rule != null) {
             nameEditText.setText(rule.getName());
             for (Condition condition : rule.getConditions()) {
-                if (condition.getLookup() == ConditionLookup.STARTS_WITH || condition.getLookup() == ConditionLookup.NOT_STARTS_WITH) {
-                    startsWithSpinner.setSelection(condition.getLookup() == ConditionLookup.STARTS_WITH ? 0 : 1);
-                    addRuleItemEdit(condition.getNumber(), startsWithLayout, startsWithRuleItems);
-                } else {
-                    equalsSpinner.setSelection(condition.getLookup() == ConditionLookup.EQUALS ? 0 : 1);
-                    addRuleItemEdit(condition.getNumber(), equalsLayout, equalsRuleItems);
-                }
+                addRuleItem(condition.getNumber(), numbersLayout, ruleItems);
             }
-        }
-    }
-
-    private void addRuleItemEdit(String input, FlowLayout parentLayout, List<RuleItemView> itemList) {
-        RuleItemView ruleItem = new RuleItemView(this, input, itemList, parentLayout);
-        if (!itemList.contains(ruleItem)) {
-            itemList.add(ruleItem);
-            parentLayout.addView(ruleItem.getView());
         }
     }
 
@@ -164,7 +120,7 @@ public class AddRuleActivity extends AppCompatActivity {
     }
 
     private void updateOrDeleteRule() {
-        if (startsWithRuleItems.isEmpty() && equalsRuleItems.isEmpty()) {
+        if (ruleItems.isEmpty()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.delete_rule_warning_no_conditions)
                     .setCancelable(false)
@@ -199,9 +155,8 @@ public class AddRuleActivity extends AppCompatActivity {
             valid = false;
         }
 
-        if (startsWithRuleItems.isEmpty() && equalsRuleItems.isEmpty()) {
-            startsWithText.setError(getString(R.string.add_rule_condition_required));
-            equalsText.setError(getString(R.string.add_rule_condition_required));
+        if (ruleItems.isEmpty()) {
+            numberEditText.setError(getString(R.string.add_rule_condition_required));
             valid = false;
         }
         return valid;
@@ -259,52 +214,36 @@ public class AddRuleActivity extends AppCompatActivity {
     }
 
     private List<Condition> getAllConditions(Long ruleId) {
-        List<Condition> conditions = new ArrayList<>(startsWithRuleItems.size() + equalsRuleItems.size());
+        List<Condition> conditions = new ArrayList<>(ruleItems.size());
         Condition condition;
-        for (RuleItemView itemView : startsWithRuleItems) {
+        for (RuleItemView itemView : ruleItems) {
             condition = new Condition();
-            if (ruleId != null) {
-                condition.setRuleId(ruleId);
-            }
-            condition.setLookup(getConditionLookup(startsWithSpinner));
+            condition.setRuleId(ruleId);
             condition.setNumber(itemView.getText());
             conditions.add(condition);
         }
 
-        for (RuleItemView itemView : equalsRuleItems) {
-            condition = new Condition();
-            if (ruleId != null) {
-                condition.setRuleId(ruleId);
-            }
-            condition.setLookup(getConditionLookup(equalsSpinner));
-            condition.setNumber(itemView.getText());
-            conditions.add(condition);
-        }
         return conditions;
     }
 
-    private ConditionLookup getConditionLookup(Spinner spinner) {
-        return ConditionLookup.findByDisplayText(spinner.getSelectedItem().toString());
-    }
-
-    public void addStartsWithInput(View view) {
-        addRuleItem(startsWithText, startsWithLayout, startsWithRuleItems, equalsRuleItems);
-    }
-
-    public void addEqualsInput(View view) {
-        addRuleItem(equalsText, equalsLayout, equalsRuleItems, startsWithRuleItems);
-    }
-
-    private void addRuleItem(EditText editText, FlowLayout parentLayout, List<RuleItemView> itemList, List<RuleItemView> secondaryItemList) {
-        String input = editText.getText().toString();
-        RuleItemView ruleItem = new RuleItemView(this, input, itemList, parentLayout);
-        if (!itemList.contains(ruleItem) && !secondaryItemList.contains(ruleItem)) {
-            itemList.add(ruleItem);
-            parentLayout.addView(ruleItem.getView());
-            editText.setText("");
+    public void addInput(View view) {
+        String number = numberEditText.getText().toString();
+        if (addRuleItem(number, numbersLayout, ruleItems)) {
+            numberEditText.setText("");
         } else {
-            editText.setError(getString(R.string.add_rule_duplicate_number));
+            numberEditText.setError(getString(R.string.add_rule_duplicate_number));
         }
+    }
+
+    private boolean addRuleItem(String number, FlowLayout numbersLayout, List<RuleItemView> ruleItems) {
+        boolean addSuccessful = false;
+        RuleItemView ruleItem = new RuleItemView(this, number, ruleItems, numbersLayout);
+        if (!ruleItems.contains(ruleItem)) {
+            ruleItems.add(ruleItem);
+            numbersLayout.addView(ruleItem.getView());
+            addSuccessful = true;
+        }
+        return addSuccessful;
     }
 
     public void close(View view) {
@@ -318,10 +257,8 @@ public class AddRuleActivity extends AppCompatActivity {
 
     private boolean hasChanges() {
         return !nameEditText.getText().toString().isEmpty()
-                || !startsWithText.getText().toString().isEmpty()
-                || !startsWithRuleItems.isEmpty()
-                || !equalsText.getText().toString().isEmpty()
-                || !equalsRuleItems.isEmpty();
+                || !numberEditText.getText().toString().isEmpty()
+                || !ruleItems.isEmpty();
     }
 
     private void showDiscardChangesDialog() {
