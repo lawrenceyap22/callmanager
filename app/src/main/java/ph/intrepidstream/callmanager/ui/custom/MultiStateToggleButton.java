@@ -16,13 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ph.intrepidstream.callmanager.R;
+import ph.intrepidstream.callmanager.util.RuleState;
 
-/**
- * Created by Jayzon on 2016/01/09.
- */
 public class MultiStateToggleButton extends View {
     private List<String> states;
-    private int currentState;
+    private int currentStateIndex;
 
     private Paint borderPaint;
     private Paint backgroundPaint;
@@ -43,6 +41,7 @@ public class MultiStateToggleButton extends View {
 
     private Rect borderBounds;
     private Rect contentBounds;
+    private Rect highlightBounds;
     private int itemWidth, itemHeight, innerPadX, innerPadY, horizontalGap;
 
     private List<Rect> textBoundsList;
@@ -56,7 +55,9 @@ public class MultiStateToggleButton extends View {
 
         initXMLAttributes(context, attrs);
         initDrawing();
+        initTextBounds();
 
+        highlightBounds = new Rect();
         gestureDetector = new GestureDetectorCompat(context, new SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
@@ -65,23 +66,18 @@ public class MultiStateToggleButton extends View {
         });
     }
 
-    public void addState(String state) {
-        states.add(state);
-    }
-
-    public void setState(int index, String state) {
-        states.set(index, state);
-    }
-
-    public void setCurrentState(int newState) {
-        int oldState = currentState;
-        currentState = newState;
-
+    public void setCurrentState(String newState) {
+        String oldState = currentStateIndex >= 0 ? states.get(currentStateIndex) : "";
+        currentStateIndex = states.indexOf(newState);
         onStateChanged(oldState, newState);
     }
 
-    public int getCurrentState() {
-        return currentState;
+    private void setCurrentStateIndex(int newStateIndex) {
+        setCurrentState(states.get(newStateIndex));
+    }
+
+    public String getCurrentState() {
+        return states.get(currentStateIndex);
     }
 
     private void initXMLAttributes(Context context, AttributeSet attrs) {
@@ -101,12 +97,10 @@ public class MultiStateToggleButton extends View {
             innerPadY = a.getDimensionPixelSize(R.styleable.MultiStateToggleButton_innerPadY, 0);
             horizontalGap = a.getDimensionPixelSize(R.styleable.MultiStateToggleButton_horizontalGap, 0);
 
-            states = new ArrayList<>();
-            CharSequence[] statesArray = a.getTextArray(R.styleable.MultiStateToggleButton_states);
-            if (statesArray != null) {
-                for (CharSequence state : statesArray) {
-                    states.add(state.toString());
-                }
+            RuleState[] ruleStates = RuleState.values();
+            states = new ArrayList<>(ruleStates.length);
+            for (RuleState ruleState : ruleStates) {
+                states.add(ruleState.toString());
             }
         } finally {
             a.recycle();
@@ -131,30 +125,11 @@ public class MultiStateToggleButton extends View {
         textPaint.setTextSize(textSize);
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        //super.onSizeChanged(w, h, oldw, oldh);
-
-        if (borderBounds == null) {
-            borderBounds = new Rect();
-        }
-        if (contentBounds == null) {
-            contentBounds = new Rect();
-        }
-
-        borderBounds.set(0, 0, w, h);
-        contentBounds.set(borderBounds.left + borderSize, borderBounds.top + borderSize, borderBounds.right - borderSize, borderBounds.bottom - borderSize);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (textBoundsList == null) {
-            textBoundsList = new ArrayList<>();
-        }
-        textBoundsList.clear();
-
+    private void initTextBounds() {
+        textBoundsList = new ArrayList<>();
         itemWidth = 0;
         itemHeight = 0;
+
         for (int i = 0; i < states.size(); i++) {
             Rect rect = new Rect();
             textPaint.getTextBounds(states.get(i), 0, states.get(i).length(), rect);
@@ -176,21 +151,31 @@ public class MultiStateToggleButton extends View {
 
             textBoundsList.set(i, rect);
         }
+    }
 
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        if (borderBounds == null) {
+            borderBounds = new Rect();
+        }
+        if (contentBounds == null) {
+            contentBounds = new Rect();
+        }
+
+        borderBounds.set(0, 0, w, h);
+        contentBounds.set(borderBounds.left + borderSize, borderBounds.top + borderSize, borderBounds.right - borderSize, borderBounds.bottom - borderSize);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int finalWidth = borderSize * 2 + itemWidth * states.size() + horizontalGap * (states.size() - 1);
         int finalHeight = itemHeight + borderSize * 2;
-
-        /* int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthsize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec); */
 
         setMeasuredDimension(finalWidth, finalHeight);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        //super.onDraw(canvas);
 
         // Draw Border
         canvas.drawRect(borderBounds, borderPaint);
@@ -199,13 +184,12 @@ public class MultiStateToggleButton extends View {
         canvas.drawRect(contentBounds, backgroundPaint);
 
         // Draw Highlight
-        Rect r = new Rect();
-        r.set(borderSize + itemWidth * currentState, borderSize, borderSize + itemWidth * (currentState + 1), borderSize + itemHeight);
-        canvas.drawRect(r, highlightPaint);
+        highlightBounds.set(borderSize + itemWidth * currentStateIndex, borderSize, borderSize + itemWidth * (currentStateIndex + 1), borderSize + itemHeight);
+        canvas.drawRect(highlightBounds, highlightPaint);
 
         // Draw Text
         for (int i = 0; i < states.size(); i++) {
-            if (currentState == i) {
+            if (currentStateIndex == i) {
                 textPaint.setColor(textHighlightColor);
             } else {
                 textPaint.setColor(textDefaultColor);
@@ -222,13 +206,13 @@ public class MultiStateToggleButton extends View {
         if (result) {
             int x = (int) event.getX();
             int selected = x / itemWidth;
-            setCurrentState(selected);
+            setCurrentStateIndex(selected);
         }
 
         return result;
     }
 
-    protected void onStateChanged(int oldState, int newState) {
+    protected void onStateChanged(String oldState, String newState) {
         invalidate();
         requestLayout();
 
@@ -241,7 +225,11 @@ public class MultiStateToggleButton extends View {
         stateChangedListeners.add(listener);
     }
 
+    public void clearListeners() {
+        stateChangedListeners.clear();
+    }
+
     public interface OnStateChangedListener {
-        void onStateChanged(int oldState, int newState);
+        void onStateChanged(String oldState, String newState);
     }
 }

@@ -13,7 +13,5 @@
         <attr name="innerPadX" format="dimension" />
         <attr name="innerPadY" format="dimension" />
         <attr name="horizontalGap" format="dimension" />
-
-        <attr name="states" format="reference" />
     </declare-styleable>
 </resources>

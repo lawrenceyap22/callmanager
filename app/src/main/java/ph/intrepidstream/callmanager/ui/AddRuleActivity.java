@@ -187,6 +187,7 @@ public class AddRuleActivity extends AppCompatActivity {
 
         Rule newRule = new Rule();
         newRule.setName(nameEditText.getText().toString());
+        newRule.setState(rule.getState());
         newRule.setConditions(getAllConditions(rule.getId()));
 
         db.beginTransaction();

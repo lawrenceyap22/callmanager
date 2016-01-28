@@ -89,10 +89,16 @@ public class RuleDaoImpl implements RuleDao {
     @Override
     public boolean updateRule(SQLiteDatabase db, Rule oldRule, Rule newRule) {
         boolean hasError = false;
-
+        ContentValues contentValues = new ContentValues();
         if (!newRule.getName().equals(oldRule.getName())) {
-            ContentValues contentValues = new ContentValues();
             contentValues.put(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, newRule.getName());
+        }
+
+        if (newRule.getState() != oldRule.getState()) {
+            contentValues.put(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, newRule.getState().name());
+        }
+
+        if (contentValues.size() > 0) {
             String whereClause = CallManagerDatabaseContract.RuleEntry._ID + "=?";
             String[] whereClauseArgs = new String[]{oldRule.getId().toString()};
 

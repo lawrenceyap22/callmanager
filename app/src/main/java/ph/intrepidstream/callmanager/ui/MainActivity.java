@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isServiceEnabled;
     private ExpandableBlockListViewAdapter rulesAdapter;
+    private int lastExpandedGroupInRulesAdapter;
     private RuleDao ruleDao;
 
     // Remove the below line after defining your own ad unit ID.
@@ -121,11 +122,21 @@ public class MainActivity extends AppCompatActivity {
         return sharedPref.getBoolean(getString(R.string.call_manage_service_key), false);
     }
 
-    private void setupExpandableListView(ExpandableListView expandableListView) {
+    private void setupExpandableListView(final ExpandableListView expandableListView) {
         DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+        lastExpandedGroupInRulesAdapter = -1;
         rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRules(db));
         expandableListView.setAdapter(rulesAdapter);
+        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            @Override
+            public void onGroupExpand(int groupPosition) {
+                if (lastExpandedGroupInRulesAdapter != -1 && lastExpandedGroupInRulesAdapter != groupPosition) {
+                    expandableListView.collapseGroup(lastExpandedGroupInRulesAdapter);
+                }
+                lastExpandedGroupInRulesAdapter = groupPosition;
+            }
+        });
     }
 
     private void setupFloatingActionButton(FloatingActionButton floatingActionButton) {

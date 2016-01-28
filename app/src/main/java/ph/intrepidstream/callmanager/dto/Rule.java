@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ph.intrepidstream.callmanager.util.RuleState;
@@ -19,7 +20,14 @@ public class Rule implements Parcelable {
     private List<Condition> conditions;
 
     public Rule() {
+    }
 
+    public Rule(Rule other) {
+        this.id = other.id;
+        this.name = other.name;
+        this.state = other.state;
+        this.isAppGenerated = other.isAppGenerated();
+        this.conditions = new ArrayList<>(other.conditions);
     }
 
     protected Rule(Parcel in) {

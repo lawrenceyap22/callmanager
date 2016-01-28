@@ -30,7 +30,6 @@
         custom:borderSize="1dp"
         custom:innerPadX="5dp"
         custom:innerPadY="5dp"
-        custom:states="@array/toggle_button_values"
         custom:textSize="14sp" />
 
 </LinearLayout>

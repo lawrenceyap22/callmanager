@@ -1,9 +1,13 @@
 package ph.intrepidstream.callmanager.ui.adapter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.widget.AppCompatImageButton;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,14 +18,21 @@ import org.apmem.tools.layouts.FlowLayout;
 
 import java.util.List;
 
+import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
+import ph.intrepidstream.callmanager.dao.RuleDao;
+import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
+import ph.intrepidstream.callmanager.db.DBHelper;
 import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
 import ph.intrepidstream.callmanager.ui.AddRuleActivity;
 import ph.intrepidstream.callmanager.ui.MainActivity;
 import ph.intrepidstream.callmanager.ui.custom.MultiStateToggleButton;
+import ph.intrepidstream.callmanager.util.RuleState;
 
 public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
+
+    private final String TAG = ExpandableBlockListViewAdapter.class.getName();
 
     private Context context;
     private List<Rule> rules;
@@ -77,12 +88,23 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
             convertView = layoutInflater.inflate(R.layout.blocklist_group, null);
         }
 
-        Rule rule = (Rule) getGroup(groupPosition);
+        final Rule rule = (Rule) getGroup(groupPosition);
         TextView textView = (TextView) convertView.findViewById(R.id.blocklist_group_name_textview);
         textView.setText(rule.getName());
 
         MultiStateToggleButton multiStateToggleButton = (MultiStateToggleButton) convertView.findViewById(R.id.blocklist_group_state_toggle);
-        multiStateToggleButton.setCurrentState(rule.getState().ordinal()); // TODO: Replace ordinal() with something else
+        multiStateToggleButton.clearListeners();
+        multiStateToggleButton.setCurrentState(rule.getState().toString());
+        multiStateToggleButton.addOnStateChangedListener(new MultiStateToggleButton.OnStateChangedListener() {
+            @Override
+            public void onStateChanged(String oldState, String newState) {
+                if (!oldState.equals(newState)) {
+                    Rule newRule = new Rule(rule);
+                    newRule.setState(RuleState.findByDisplayText(newState));
+                    updateRule(rule, newRule);
+                }
+            }
+        });
 
         return convertView;
     }
@@ -108,6 +130,14 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
             }
         });
 
+        AppCompatImageButton deleteButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_child_delete);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                warnDeleteRule((Rule) getGroup(groupPosition));
+            }
+        });
+
         View childView;
         TextView number;
         for (Condition condition : conditions) {
@@ -126,6 +156,61 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         Intent editRuleIntent = new Intent(context, AddRuleActivity.class);
         editRuleIntent.putExtra(MainActivity.EXTRA_EDIT_RULE, rule);
         ((Activity) context).startActivityForResult(editRuleIntent, MainActivity.ADD_EDIT_RULE_REQUEST);
+    }
+
+    private void warnDeleteRule(final Rule rule) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(R.string.delete_rule_warning)
+                .setCancelable(false)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteRuleAndConditions(rule);
+                        dialog.cancel();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    private void updateRule(Rule oldRule, Rule newRule) {
+        DBHelper dbHelper = DBHelper.getInstance(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        RuleDao ruleDao = RuleDaoImpl.getInstance();
+        db.beginTransaction();
+        if (ruleDao.updateRule(db, oldRule, newRule)) {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Rule " + newRule.getName() + " updated to " + newRule.getState().toString());
+            }
+            oldRule.setState(newRule.getState());
+            db.setTransactionSuccessful();
+        }
+        db.endTransaction();
+    }
+
+    private void deleteRuleAndConditions(Rule rule) {
+        DBHelper dbHelper = DBHelper.getInstance(context);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        RuleDao ruleDao = RuleDaoImpl.getInstance();
+        db.beginTransaction();
+        if (ruleDao.deleteRule(db, rule.getId()) > 0) {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Rule deleted successfully.");
+            }
+            rules.remove(rule);
+            notifyDataSetChanged();
+            db.setTransactionSuccessful();
+        }
+        db.endTransaction();
     }
 
     @Override
