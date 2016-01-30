@@ -32,6 +32,7 @@ import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
 public class MainActivity extends AppCompatActivity {
 
     public final static String EXTRA_EDIT_RULE = "ph.intrepidstream.callmanager.ui.EDIT_RULE";
+    public final static int PENDING_INTENT_REQUEST = 0;
     public final static int ADD_EDIT_RULE_REQUEST = 1;
 
     private final String TAG = MainActivity.class.getName();

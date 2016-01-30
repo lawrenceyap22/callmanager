@@ -110,7 +110,7 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getChildView(final int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         LayoutInflater layoutInflater = null;
         if (convertView == null) {
             layoutInflater = LayoutInflater.from(context);
@@ -122,22 +122,26 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         FlowLayout numbersLayout = (FlowLayout) convertView.findViewById(R.id.blocklist_child_numbers);
         numbersLayout.removeAllViews();
 
+        final Rule rule = (Rule) getGroup(groupPosition);
         AppCompatImageButton editButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_child_edit);
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editRule((Rule) getGroup(groupPosition));
-            }
-        });
-
         AppCompatImageButton deleteButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_child_delete);
-        deleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                warnDeleteRule((Rule) getGroup(groupPosition));
-            }
-        });
-
+        if (rule.isAppGenerated()) {
+            editButton.setVisibility(View.GONE);
+            deleteButton.setVisibility(View.GONE);
+        } else {
+            editButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editRule(rule);
+                }
+            });
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    warnDeleteRule(rule);
+                }
+            });
+        }
         View childView;
         TextView number;
         for (Condition condition : conditions) {

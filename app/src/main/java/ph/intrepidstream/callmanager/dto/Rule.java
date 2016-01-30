@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import ph.intrepidstream.callmanager.util.RuleState;
@@ -102,6 +103,19 @@ public class Rule implements Parcelable {
 
     public void setConditions(List<Condition> conditions) {
         this.conditions = conditions;
+    }
+
+    public boolean isIncluded(String number) {
+        boolean included = false;
+        Iterator<Condition> conditionIterator = conditions.iterator();
+        Condition condition;
+        while (!included && conditionIterator.hasNext()) {
+            condition = conditionIterator.next();
+            if (number.startsWith(condition.getNumber())) {
+                included = true;
+            }
+        }
+        return included;
     }
 
     @Override
