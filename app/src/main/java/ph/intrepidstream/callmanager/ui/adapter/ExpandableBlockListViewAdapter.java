@@ -129,6 +129,8 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
             editButton.setVisibility(View.GONE);
             deleteButton.setVisibility(View.GONE);
         } else {
+            editButton.setVisibility(View.VISIBLE);
+            deleteButton.setVisibility(View.VISIBLE);
             editButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

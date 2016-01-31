@@ -65,7 +65,7 @@ public class OutgoingReceiver extends BroadcastReceiver {
         Rule rule;
         while (ruleState == RuleState.OFF && ruleIterator.hasNext()) {
             rule = ruleIterator.next();
-            if (rule.isIncluded(phoneNumber)) {
+            if (rule.getState() != RuleState.OFF && rule.isIncluded(phoneNumber)) {
                 ruleState = rule.getState();
             }
         }
