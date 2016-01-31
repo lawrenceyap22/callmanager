@@ -189,10 +189,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Closing Database");
+        if (!isServiceEnabled) {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Closing Database");
+            }
+            DBHelper.getInstance(this).close();
         }
-        DBHelper.getInstance(this).close();
         super.onDestroy();
     }
 }
