@@ -1,8 +1,7 @@
 <resources>
     <string name="app_name">Call Manager</string>
     <string name="action_settings">Settings</string>
-    <string name="outgoing_warning_title">Call Manager</string>
-    <string name="outgoing_warning_message">Number is in the blocked list.\n\nThis may incur additional charges.</string>
+    <string name="outgoing_warning_message">You are trying to call %s number.\n\nThis may incur additional charges.</string>
     <string name="outgoing_warning_positive">Make Call</string>
     <string name="permission_denied_title">Permission Denied</string>
     <string name="permission_denied_message">Without this permission, the app is unable to proceed the call once it is temporarily blocked by the warning. Are you sure you want to deny this permission?</string>
@@ -18,7 +17,7 @@
     <string name="add_rule_duplicate_number">Number is already added as a condition.</string>
     <string name="delete_rule_warning_no_conditions">No conditions added. This rule will be deleted instead.</string>
     <string name="delete_rule_warning">Are you sure you want to delete this rule?</string>
-    <string name="block_notification_content">Your call to %s has been blocked.</string>
+    <string name="outgoing_block_message">Your call to %s number has been blocked to prevent incurring of additional charges.</string>
 
     <string name="preference_file_key">ph.intrepidstream.callmanager.PREFERENCE_FILE_KEY</string>
     <string name="call_manage_service_key">ph.intrepidstream.callmanager.CALL_MANAGE_SERVICE_KEY</string>

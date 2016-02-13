@@ -15,37 +15,58 @@ import android.support.v4.content.ContextCompat;
 
 import ph.intrepidstream.callmanager.R;
 import ph.intrepidstream.callmanager.util.AppGlobal;
+import ph.intrepidstream.callmanager.util.RuleState;
 
 public class DialogActivity extends Activity {
 
-    private static final int PERMISSION_REQUEST_CALL_PHONE = 0x1;
+    public static final String EXTRA_OPERATOR_NAME = "ph.intrepidstream.callmanager.ui.OPERATOR_NAME";
+    public static final String EXTRA_DIALOG_TYPE = "ph.intrepidstream.callmanager.ui.DIALOG_TYPE";
+    private static final int PERMISSION_REQUEST_CALL_PHONE = 1;
 
     private String phoneNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Intent intent = getIntent();
+        String operatorName = intent.getStringExtra(EXTRA_OPERATOR_NAME);
+        String type = intent.getStringExtra(EXTRA_DIALOG_TYPE);
         phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.outgoing_warning_title)
-                .setMessage(R.string.outgoing_warning_message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.outgoing_warning_positive, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        attemptCall();
-                        finish();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        finish();
-                    }
-                });
+
+        if (RuleState.WARN.toString().equals(type)) {
+            builder.setTitle(R.string.app_name)
+                    .setMessage(getString(R.string.outgoing_warning_message, operatorName))
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.outgoing_warning_positive, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            attemptCall();
+                            finish();
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            finish();
+                        }
+                    });
+        } else {
+            builder.setTitle(R.string.app_name)
+                    .setMessage(getString(R.string.outgoing_block_message, operatorName))
+                    .setCancelable(false)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            finish();
+                        }
+                    });
+        }
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }

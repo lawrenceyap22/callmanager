@@ -76,10 +76,6 @@ public class MultiStateToggleButton extends View {
         setCurrentState(states.get(newStateIndex));
     }
 
-    public String getCurrentState() {
-        return states.get(currentStateIndex);
-    }
-
     private void initXMLAttributes(Context context, AttributeSet attrs) {
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.MultiStateToggleButton, 0, 0);
 
@@ -206,6 +202,7 @@ public class MultiStateToggleButton extends View {
         if (result) {
             int x = (int) event.getX();
             int selected = x / itemWidth;
+            selected = Math.max(0, Math.min(selected, RuleState.values().length - 1));
             setCurrentStateIndex(selected);
         }
 
