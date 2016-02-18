@@ -34,6 +34,7 @@
         <activity
             android:name=".ui.DialogActivity"
             android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
             android:theme="@style/Theme.AppCompat.Light.Dialog" />
 
         <!-- Include the AdActivity configChanges and theme. -->
