@@ -1,47 +1,23 @@
-<RelativeLayout
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
-    <FrameLayout
+    <ExpandableListView
+        android:id="@+id/activity_main_expandable_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/adHolder">
+        android:layout_height="match_parent" />
 
-        <ExpandableListView
-            android:id="@+id/activity_main_expandable_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/activity_main_floating_action_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/fab_margin"
-            android:src="@android:drawable/ic_input_add"
-            android:tint="@android:color/white"
-            ads:backgroundTint="@android:color/holo_orange_light"/>
-    </FrameLayout>
-
-    <LinearLayout
-        android:id="@+id/adHolder"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/activity_main_floating_action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true">
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_input_add"
+        android:tint="@android:color/white"
+        ads:backgroundTint="@android:color/holo_orange_light" />
 
-        <!-- view for AdMob Banner Ad -->
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/banner_ad_unit_id"/>
-    </LinearLayout>
-
-
-</RelativeLayout>
+</FrameLayout>

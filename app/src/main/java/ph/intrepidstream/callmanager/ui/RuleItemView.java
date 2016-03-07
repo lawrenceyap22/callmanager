@@ -32,7 +32,7 @@ public class RuleItemView {
 
     private void init() {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        view = layoutInflater.inflate(R.layout.item_add_rule, null);
+        view = layoutInflater.inflate(R.layout.item_add_rule, parentLayout, false);
 
         TextView textView = (TextView) view.findViewById(R.id.rule_item_text);
         textView.setText(text);

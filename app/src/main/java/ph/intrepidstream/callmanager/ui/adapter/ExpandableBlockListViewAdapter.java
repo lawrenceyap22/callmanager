@@ -85,7 +85,7 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
-            convertView = layoutInflater.inflate(R.layout.blocklist_group, null);
+            convertView = layoutInflater.inflate(R.layout.blocklist_group, parent, false);
         }
 
         final Rule rule = (Rule) getGroup(groupPosition);
@@ -114,9 +114,10 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         LayoutInflater layoutInflater = null;
         if (convertView == null) {
             layoutInflater = LayoutInflater.from(context);
-            convertView = layoutInflater.inflate(R.layout.blocklist_child, null);
+            convertView = layoutInflater.inflate(R.layout.blocklist_child, parent, false);
         }
 
+        @SuppressWarnings("unchecked")
         List<Condition> conditions = (List<Condition>) getChild(groupPosition, childPosition);
 
         FlowLayout numbersLayout = (FlowLayout) convertView.findViewById(R.id.blocklist_child_numbers);

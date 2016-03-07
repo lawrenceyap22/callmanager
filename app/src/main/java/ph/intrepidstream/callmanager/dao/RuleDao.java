@@ -10,6 +10,8 @@ public interface RuleDao {
 
     List<Rule> retrieveRules(SQLiteDatabase db);
 
+    Rule getRuleByName(SQLiteDatabase db, String name);
+
     long insertRule(SQLiteDatabase db, Rule rule);
 
     boolean updateRule(SQLiteDatabase db, Rule oldRule, Rule newRule);

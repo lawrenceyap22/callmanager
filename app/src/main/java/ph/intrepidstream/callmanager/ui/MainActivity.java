@@ -16,10 +16,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ExpandableListView;
-import android.widget.Toast;
-
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 
 import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
@@ -32,7 +28,6 @@ import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
 public class MainActivity extends AppCompatActivity {
 
     public final static String EXTRA_EDIT_RULE = "ph.intrepidstream.callmanager.ui.EDIT_RULE";
-    public final static int PENDING_INTENT_REQUEST = 0;
     public final static int ADD_EDIT_RULE_REQUEST = 1;
 
     private final String TAG = MainActivity.class.getName();
@@ -41,10 +36,6 @@ public class MainActivity extends AppCompatActivity {
     private ExpandableBlockListViewAdapter rulesAdapter;
     private int lastExpandedGroupInRulesAdapter;
     private RuleDao ruleDao;
-
-    // Remove the below line after defining your own ad unit ID.
-    private static final String TOAST_TEXT = "Test ads are being shown. "
-            + "To show live ads, replace the ad unit ID in res/values/strings.xml with your own ad unit ID.";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,15 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.activity_main_floating_action_button);
         setupFloatingActionButton(floatingActionButton);
-
-        // Load an ad into the AdMob banner view.
-        AdView adView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder()
-                .setRequestAgent("android_studio:ad_template").build();
-        adView.loadAd(adRequest);
-
-        // Toasts the test ad message on the screen. Remove this after defining your own ad unit ID.
-        Toast.makeText(this, TOAST_TEXT, Toast.LENGTH_LONG).show();
     }
 
     @Override

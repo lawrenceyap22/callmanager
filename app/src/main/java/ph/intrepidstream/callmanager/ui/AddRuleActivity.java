@@ -104,14 +104,33 @@ public class AddRuleActivity extends AppCompatActivity {
     }
 
     public void saveRule(View view) {
-        if (rule != null) {
-            updateOrDeleteRule();
-        } else {
-            if (isValidToInsert()) {
+        if (isNameValid()) {
+            if (rule != null) {
+                updateOrDeleteRule();
+            } else if (isValidToInsert()) {
                 insertRule();
                 done();
             }
         }
+    }
+
+    private boolean isNameValid() {
+        boolean valid = true;
+        String name = nameEditText.getText().toString().trim();
+        if (name.isEmpty()) {
+            valid = false;
+            nameEditText.setError(getString(R.string.add_rule_name_required));
+        } else {
+            DBHelper dbHelper = DBHelper.getInstance(this);
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            Rule dbRule = ruleDao.getRuleByName(db, name);
+
+            if (dbRule != null && (rule == null || !dbRule.getId().equals(rule.getId()))) {
+                valid = false;
+                nameEditText.setError(getString(R.string.add_rule_name_exist));
+            }
+        }
+        return valid;
     }
 
     private void done() {
@@ -140,21 +159,14 @@ public class AddRuleActivity extends AppCompatActivity {
                     });
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
-        } else if (!nameEditText.getText().toString().isEmpty()) {
+        } else {
             updateRule();
             done();
-        } else {
-            nameEditText.setError(getString(R.string.add_rule_name_required));
         }
     }
 
     private boolean isValidToInsert() {
         boolean valid = true;
-        if (nameEditText.getText().toString().isEmpty()) {
-            nameEditText.setError(getString(R.string.add_rule_name_required));
-            valid = false;
-        }
-
         if (ruleItems.isEmpty()) {
             numberEditText.setError(getString(R.string.add_rule_condition_required));
             valid = false;
@@ -167,7 +179,7 @@ public class AddRuleActivity extends AppCompatActivity {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         rule = new Rule();
-        rule.setName(nameEditText.getText().toString());
+        rule.setName(nameEditText.getText().toString().trim());
         rule.setIsAppGenerated(false);
         rule.setConditions(getAllConditions(rule.getId()));
 
@@ -186,7 +198,7 @@ public class AddRuleActivity extends AppCompatActivity {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         Rule newRule = new Rule();
-        newRule.setName(nameEditText.getText().toString());
+        newRule.setName(nameEditText.getText().toString().trim());
         newRule.setState(rule.getState());
         newRule.setConditions(getAllConditions(rule.getId()));
 

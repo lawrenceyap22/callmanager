@@ -63,6 +63,25 @@ public class RuleDaoImpl implements RuleDao {
     }
 
     @Override
+    public Rule getRuleByName(SQLiteDatabase db, String name) {
+        Rule rule = null;
+        String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED};
+        String selection = CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME + "=?";
+        String[] selectionArgs = {name};
+        Cursor cursor = db.query(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+        if (cursor.moveToFirst()) {
+            rule = new Rule();
+            rule.setId(cursor.getLong(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry._ID)));
+            rule.setName(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME)));
+            rule.setState(RuleState.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE))));
+            rule.setIsAppGenerated(cursor.getInt(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED)) != 0);
+            rule.setConditions(conditionDao.retrieveConditions(db, rule.getId()));
+        }
+        cursor.close();
+        return rule;
+    }
+
+    @Override
     public long insertRule(SQLiteDatabase db, Rule rule) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, rule.getName());
@@ -113,12 +132,12 @@ public class RuleDaoImpl implements RuleDao {
 
     @Override
     public int deleteRule(SQLiteDatabase db, Long id) {
-        String ruleWhereClause = CallManagerDatabaseContract.RuleEntry._ID + "=?";
+        String whereClause = CallManagerDatabaseContract.RuleEntry._ID + "=?";
         String[] whereClauseArgs = {id.toString()};
         int deletedRule;
 
         if ((deletedRule = conditionDao.deleteConditionsByRule(db, id)) > 0) {
-            if (db.delete(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, ruleWhereClause, whereClauseArgs) == 0) {
+            if (db.delete(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, whereClause, whereClauseArgs) == 0) {
                 deletedRule = 0;
             }
         }
