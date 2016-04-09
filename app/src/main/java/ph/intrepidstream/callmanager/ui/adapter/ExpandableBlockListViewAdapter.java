@@ -27,7 +27,7 @@ import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
 import ph.intrepidstream.callmanager.ui.AddRuleActivity;
 import ph.intrepidstream.callmanager.ui.MainActivity;
-import ph.intrepidstream.callmanager.ui.custom.MultiStateToggleButton;
+import ph.intrepidstream.callmanager.ui.custom.MultiStateSlider;
 import ph.intrepidstream.callmanager.util.RuleState;
 
 public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
@@ -92,13 +92,13 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         TextView textView = (TextView) convertView.findViewById(R.id.blocklist_group_name_textview);
         textView.setText(rule.getName());
 
-        MultiStateToggleButton multiStateToggleButton = (MultiStateToggleButton) convertView.findViewById(R.id.blocklist_group_state_toggle);
-        multiStateToggleButton.clearListeners();
-        multiStateToggleButton.setCurrentState(rule.getState().toString());
-        multiStateToggleButton.addOnStateChangedListener(new MultiStateToggleButton.OnStateChangedListener() {
+        MultiStateSlider multiStateSlider = (MultiStateSlider) convertView.findViewById(R.id.blocklist_group_state_toggle);
+        multiStateSlider.clearListeners();
+        multiStateSlider.setCurrentState(rule.getState().toString());
+        multiStateSlider.addOnStateChangedListener(new MultiStateSlider.OnStateChangedListener() {
             @Override
             public void onStateChanged(String oldState, String newState) {
-                if (!oldState.equals(newState)) {
+                if(!oldState.equals(newState)) {
                     Rule newRule = new Rule(rule);
                     newRule.setState(RuleState.findByDisplayText(newState));
                     updateRule(rule, newRule);
