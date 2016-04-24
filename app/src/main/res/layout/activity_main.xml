@@ -1,23 +1,80 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:background="@color/toolbarRulesTypesBackground"
+            android:id="@+id/toolbar_rules">
+
+            <TextView
+                android:layout_weight="4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/rule_type_toolbar_padding"
+                android:paddingBottom="@dimen/rule_type_toolbar_padding"
+                android:background="@color/toolbarRulesBackground"
+                android:textColor="#FFFFFFFF"
+                android:textAlignment="center"
+                android:text="RULES"
+                android:textSize="12dp"/>
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/rule_type_toolbar_padding"
+                android:paddingBottom="@dimen/rule_type_toolbar_padding"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:textColor="#FFFFFFFF"
+                android:text="@string/rule_type_off"
+                android:textSize="12dp"/>
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/rule_type_toolbar_padding"
+                android:paddingBottom="@dimen/rule_type_toolbar_padding"
+                android:textColor="#FFFFFFFF"
+                android:gravity="center"
+                android:text="@string/rule_type_warn"
+                android:textSize="12dp"/>
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/rule_type_toolbar_padding"
+                android:paddingBottom="@dimen/rule_type_toolbar_padding"
+                android:textColor="#FFFFFFFF"
+                android:gravity="end"
+                android:text="@string/rule_type_block"
+                android:textSize="12dp"/>
+        </LinearLayout>
+
     <ExpandableListView
         android:id="@+id/activity_main_expandable_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar_rules"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/activity_main_floating_action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         android:src="@android:drawable/ic_input_add"
         android:tint="@android:color/white"
-        ads:backgroundTint="@android:color/holo_orange_light" />
+        ads:backgroundTint="@color/brightBlue" />
 
-</FrameLayout>
+</RelativeLayout>
