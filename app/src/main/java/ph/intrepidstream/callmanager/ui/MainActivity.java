@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
@@ -80,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
     private void setupCustomActionBar(ActionBar actionBar) {
         actionBar.setDisplayShowHomeEnabled(false);
         actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setElevation(0);
+        actionBar.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.actionbar_background_white, null));
 
         LayoutInflater inflater = LayoutInflater.from(this);
         View customView = inflater.inflate(R.layout.actionbar_custom, null);

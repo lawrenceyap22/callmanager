@@ -9,7 +9,7 @@
     </style>
 
     <style name="AppSwitch" parent="Widget.AppCompat.CompoundButton.Switch">
-        <item name="colorAccent">@android:color/holo_orange_light</item>
+        <item name="colorAccent">@color/brightBlue</item>
     </style>
 
 </resources>
