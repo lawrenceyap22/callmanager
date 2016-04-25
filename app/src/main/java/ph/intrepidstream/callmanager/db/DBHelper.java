@@ -16,6 +16,7 @@ import ph.intrepidstream.callmanager.dao.RuleDao;
 import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
 import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
+import ph.intrepidstream.callmanager.util.Country;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -44,12 +45,10 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private void initializeDefaultData(SQLiteDatabase db) {
-        RuleDao ruleDao = RuleDaoImpl.getInstance();
-        Rule rule;
-        Condition condition;
-        List<Condition> conditions;
-        String[] numbers;
+        initializePhilippinesData(db);
+    }
 
+    private void initializePhilippinesData(SQLiteDatabase db) {
         Map<String, String[]> defaultData = new LinkedHashMap<>(6);
         defaultData.put(context.getString(R.string.globe_operator), context.getString(R.string.globe_prefixes).split(","));
         defaultData.put(context.getString(R.string.smart_operator), context.getString(R.string.smart_prefixes).split(","));
@@ -58,17 +57,41 @@ public class DBHelper extends SQLiteOpenHelper {
         defaultData.put(context.getString(R.string.next_mobile_operator), context.getString(R.string.next_mobile_prefixes).split(","));
         defaultData.put(context.getString(R.string.roaming_numbers), context.getString(R.string.roaming_prefixes).split(","));
 
-        for (Map.Entry<String, String[]> defaultDataEntry : defaultData.entrySet()) {
+        insertData(db, defaultData, Country.PHILIPPINES);
+    }
+
+    private void initializeIndonesiaData(SQLiteDatabase db) {
+        Map<String, String[]> defaultData = new LinkedHashMap<>(6);
+        defaultData.put(context.getString(R.string.telekomunikasi_selular_operator), context.getString(R.string.telekomunikasi_selular_prefixes).split(","));
+        defaultData.put(context.getString(R.string.indosat_operator), context.getString(R.string.indosat_prefixes).split(","));
+        defaultData.put(context.getString(R.string.xl_axiata_operator), context.getString(R.string.xl_axiata_prefixes).split(","));
+        defaultData.put(context.getString(R.string.sampoerna_telekomunikasi_indonesia_operator), context.getString(R.string.sampoerna_telekomunikasi_indonesia_prefixes).split(","));
+        defaultData.put(context.getString(R.string.axis_telekom_indonesia_operator), context.getString(R.string.axis_telekom_indonesia_prefixes).split(","));
+        defaultData.put(context.getString(R.string.smartfren_telecom_operator), context.getString(R.string.smartfren_telecom_prefixes).split(","));
+        defaultData.put(context.getString(R.string.hutchison_3_indonesia_operator), context.getString(R.string.hutchison_3_indonesia_prefixes).split(","));
+
+        insertData(db, defaultData, Country.INDONESIA);
+    }
+
+    private void insertData(SQLiteDatabase db, Map<String, String[]> data, Country country) {
+        RuleDao ruleDao = RuleDaoImpl.getInstance();
+        Rule rule;
+        Condition condition;
+        List<Condition> conditions;
+        String[] numbers;
+
+        for (Map.Entry<String, String[]> dataEntry : data.entrySet()) {
             rule = new Rule();
-            numbers = defaultDataEntry.getValue();
+            numbers = dataEntry.getValue();
             conditions = new ArrayList<>(numbers.length);
             for (String number : numbers) {
                 condition = new Condition();
                 condition.setNumber(number);
                 conditions.add(condition);
             }
-            rule.setName(defaultDataEntry.getKey());
+            rule.setName(dataEntry.getKey());
             rule.setIsAppGenerated(true);
+            rule.setCountry(country);
             rule.setConditions(conditions);
 
             db.beginTransaction();

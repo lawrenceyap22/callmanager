@@ -20,12 +20,14 @@ public final class CallManagerDatabaseContract {
         public static final String COLUMN_NAME_NAME = "name";
         public static final String COLUMN_NAME_STATE = "state"; //off, warn, block
         public static final String COLUMN_NAME_APP_GENERATED = "app_generated";
+        public static final String COLUMN_NAME_COUNTRY = "country";
 
         public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ("
                 + _ID + INTEGER_TYPE + " PRIMARY KEY AUTOINCREMENT" + COMMA_SEP
                 + COLUMN_NAME_NAME + TEXT_TYPE + NOT_NULL + COMMA_SEP
                 + COLUMN_NAME_STATE + TEXT_TYPE + NOT_NULL + COMMA_SEP
                 + COLUMN_NAME_APP_GENERATED + INTEGER_TYPE + NOT_NULL + COMMA_SEP
+                + COLUMN_NAME_COUNTRY + TEXT_TYPE + NOT_NULL + COMMA_SEP
                 + "UNIQUE( " + COLUMN_NAME_NAME + " ))";
 
         public static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;

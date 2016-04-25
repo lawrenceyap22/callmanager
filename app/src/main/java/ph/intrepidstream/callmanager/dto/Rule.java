@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import ph.intrepidstream.callmanager.util.Country;
 import ph.intrepidstream.callmanager.util.RuleState;
 
 public class Rule implements Parcelable {
@@ -18,6 +19,7 @@ public class Rule implements Parcelable {
     private String name;
     private RuleState state;
     private boolean isAppGenerated;
+    private Country country;
     private List<Condition> conditions;
 
     public Rule() {
@@ -28,6 +30,7 @@ public class Rule implements Parcelable {
         this.name = other.name;
         this.state = other.state;
         this.isAppGenerated = other.isAppGenerated();
+        this.country = other.country;
         this.conditions = new ArrayList<>(other.conditions);
     }
 
@@ -36,6 +39,7 @@ public class Rule implements Parcelable {
         name = in.readString();
         state = RuleState.valueOf(in.readString());
         isAppGenerated = in.readInt() != 0;
+        country = Country.valueOf(in.readString());
         conditions = in.createTypedArrayList(Condition.CREATOR);
     }
 
@@ -62,6 +66,7 @@ public class Rule implements Parcelable {
         dest.writeString(name);
         dest.writeString(state.name());
         dest.writeInt(isAppGenerated ? 1 : 0);
+        dest.writeString(country.name());
         dest.writeTypedList(conditions);
     }
 
@@ -97,6 +102,14 @@ public class Rule implements Parcelable {
         this.isAppGenerated = isAppGenerated;
     }
 
+    public Country getCountry() {
+        return country;
+    }
+
+    public void setCountry(Country country) {
+        this.country = country;
+    }
+
     public List<Condition> getConditions() {
         return conditions;
     }
@@ -127,10 +140,11 @@ public class Rule implements Parcelable {
         Rule rule = (Rule) o;
 
         return new EqualsBuilder()
+                .append(isAppGenerated, rule.isAppGenerated)
                 .append(id, rule.id)
                 .append(name, rule.name)
                 .append(state, rule.state)
-                .append(isAppGenerated, rule.isAppGenerated)
+                .append(country, rule.country)
                 .isEquals();
     }
 
@@ -141,6 +155,7 @@ public class Rule implements Parcelable {
                 .append(name)
                 .append(state)
                 .append(isAppGenerated)
+                .append(country)
                 .toHashCode();
     }
 
@@ -151,7 +166,7 @@ public class Rule implements Parcelable {
                 .append("name", name)
                 .append("state", state)
                 .append("isAppGenerated", isAppGenerated)
+                .append("country", country)
                 .toString();
     }
-
 }

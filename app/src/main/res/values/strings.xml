@@ -6,8 +6,10 @@
     <string name="permission_denied_title">Permission Denied</string>
     <string name="permission_denied_message">Without this permission, the app is unable to proceed the call once it is temporarily blocked by the warning. Are you sure you want to deny this permission?</string>
     <string name="permission_denied_positive">I\'m Sure</string>
-    <string name="add_rule_title">Add Rule</string>
-    <string name="add_rule_save">Save</string>
+    <string name="add_rule_add_label">Add Rule</string>
+    <string name="add_rule_edit_label">Edit Rule</string>
+    <string name="add_rule_edit_button">Save</string>
+    <string name="add_rule_add_button">Add</string>
     <string name="add_rule_name_hint">Name</string>
     <string name="add_rule_rules_label">Prefixes:</string>
     <string name="add_rule_number_hint">Number</string>
@@ -33,6 +35,14 @@
     <string name="next_mobile_operator">Next Mobile</string>
     <string name="roaming_numbers">Roaming</string>
 
+    <string name="telekomunikasi_selular_operator">Telekomunikasi Selular</string>
+    <string name="indosat_operator">Indosat Ooredoo</string>
+    <string name="xl_axiata_operator">XL Axiata</string>
+    <string name="sampoerna_telekomunikasi_indonesia_operator">Sampoerna Telekomunikasi Indonesia</string>
+    <string name="axis_telekom_indonesia_operator">Axis Telekom Indonesia</string>
+    <string name="smartfren_telecom_operator">Smartfren Telecom</string>
+    <string name="hutchison_3_indonesia_operator">Hutchison 3 Indonesia</string>
+
     <!-- Prefix Numbers-->
     <string name="globe_prefixes">0817,0905,0906,0915,0916,0917,0926,0927,0935,0936,0937,0945,0975,0976,0977,0994,0995,0996,0997</string>
     <string name="smart_prefixes">0813,0907,0908,0909,0910,0911,0912,0913,0914,0918,0919,0920,0921,0928,0929,0930,0938,0939,0946,0947,0948,0949,0950,0970,0981,0989,0998,0999</string>
@@ -40,6 +50,14 @@
     <string name="extelcom_prefixes">0973,0974</string>
     <string name="next_mobile_prefixes">0978,0979</string>
     <string name="roaming_prefixes">00</string>
+
+    <string name="telekomunikasi_selular_prefixes">0811,0812,0813,0821,0822,0852,0853</string>
+    <string name="indosat_prefixes">0814,0815,0816,0855,0856,0857</string>
+    <string name="xl_axiata_prefixes">0817,0818,0819,0859,0874,0876,0877,0878,0879</string>
+    <string name="sampoerna_telekomunikasi_indonesia_prefixes">0827,0828</string>
+    <string name="axis_telekom_indonesia_prefixes">0831,0832,0838,</string>
+    <string name="smartfren_telecom_prefixes">0881,0882,0888</string>
+    <string name="hutchison_3_indonesia_prefixes">0896,0897,0898,0899</string>
 
     <!-- -
         This is an ad unit ID for a banner test ad. Replace with your own banner ad unit id.

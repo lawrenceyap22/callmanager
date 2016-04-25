@@ -15,6 +15,7 @@ import ph.intrepidstream.callmanager.dao.RuleDao;
 import ph.intrepidstream.callmanager.db.CallManagerDatabaseContract;
 import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
+import ph.intrepidstream.callmanager.util.Country;
 import ph.intrepidstream.callmanager.util.RuleState;
 
 public class RuleDaoImpl implements RuleDao {
@@ -36,11 +37,13 @@ public class RuleDaoImpl implements RuleDao {
     }
 
     @Override
-    public List<Rule> retrieveRules(SQLiteDatabase db) {
+    public List<Rule> retrieveCustomRules(SQLiteDatabase db) {
         List<Rule> rules = new ArrayList<>();
-        String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED};
+        String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_COUNTRY};
         String sortOrder = CallManagerDatabaseContract.RuleEntry._ID;
-        Cursor cursor = db.query(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, columns, null, null, null, null, sortOrder);
+        String selection = CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED + "=?";
+        String[] selectionArgs = {"0"};
+        Cursor cursor = db.query(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, columns, selection, selectionArgs, null, null, sortOrder);
         Rule rule;
 
         if (cursor.moveToFirst()) {
@@ -50,6 +53,37 @@ public class RuleDaoImpl implements RuleDao {
                 rule.setName(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME)));
                 rule.setState(RuleState.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE))));
                 rule.setIsAppGenerated(cursor.getInt(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED)) != 0);
+                rule.setCountry(Country.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_COUNTRY))));
+                rule.setConditions(conditionDao.retrieveConditions(db, rule.getId()));
+                rules.add(rule);
+
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "Retrieved Rule: " + rule.toString());
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return rules;
+    }
+
+    @Override
+    public List<Rule> retrieveRulesByCountry(SQLiteDatabase db, Country country) {
+        List<Rule> rules = new ArrayList<>();
+        String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_COUNTRY};
+        String sortOrder = CallManagerDatabaseContract.RuleEntry._ID;
+        String selection = CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_COUNTRY + "=?";
+        String[] selectionArgs = {country.name()};
+        Cursor cursor = db.query(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, columns, selection, selectionArgs, null, null, sortOrder);
+        Rule rule;
+
+        if (cursor.moveToFirst()) {
+            do {
+                rule = new Rule();
+                rule.setId(cursor.getLong(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry._ID)));
+                rule.setName(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME)));
+                rule.setState(RuleState.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE))));
+                rule.setIsAppGenerated(cursor.getInt(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED)) != 0);
+                rule.setCountry(Country.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_COUNTRY))));
                 rule.setConditions(conditionDao.retrieveConditions(db, rule.getId()));
                 rules.add(rule);
 
@@ -75,6 +109,7 @@ public class RuleDaoImpl implements RuleDao {
             rule.setName(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME)));
             rule.setState(RuleState.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE))));
             rule.setIsAppGenerated(cursor.getInt(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED)) != 0);
+            rule.setCountry(Country.valueOf(cursor.getString(cursor.getColumnIndex(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_COUNTRY))));
             rule.setConditions(conditionDao.retrieveConditions(db, rule.getId()));
         }
         cursor.close();
@@ -87,6 +122,7 @@ public class RuleDaoImpl implements RuleDao {
         contentValues.put(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, rule.getName());
         contentValues.put(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, RuleState.OFF.name());
         contentValues.put(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED, rule.isAppGenerated());
+        contentValues.put(CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_COUNTRY, rule.getCountry().name());
         Long newId = db.insert(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, null, contentValues);
         if (newId != -1) {
             boolean hasError = false;

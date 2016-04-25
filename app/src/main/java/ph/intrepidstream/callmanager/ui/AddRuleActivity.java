@@ -12,7 +12,9 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.apmem.tools.layouts.FlowLayout;
 
@@ -43,12 +45,13 @@ public class AddRuleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_rule);
 
-        ActionBar actionBar = getSupportActionBar();
-        initCustomActionBar(actionBar);
-
         ruleDao = RuleDaoImpl.getInstance();
         initViews();
         initViewValuesIfEdit();
+
+        //Set up action bar last for custom texts of Add and Edit Rules
+        ActionBar actionBar = getSupportActionBar();
+        initCustomActionBar(actionBar);
     }
 
     private void initCustomActionBar(ActionBar actionBar) {
@@ -57,6 +60,16 @@ public class AddRuleActivity extends AppCompatActivity {
 
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         View view = layoutInflater.inflate(R.layout.actionbar_add_rule_custom, null);
+        TextView title = (TextView) view.findViewById(R.id.add_rule_label);
+        Button button = (Button) view.findViewById(R.id.add_rule_button);
+
+        if (rule != null) {
+            title.setText(getString(R.string.add_rule_edit_label));
+            button.setText(getString(R.string.add_rule_edit_button));
+        } else {
+            title.setText(getString(R.string.add_rule_add_label));
+            button.setText(getString(R.string.add_rule_add_button));
+        }
 
         actionBar.setCustomView(view);
         actionBar.setDisplayShowCustomEnabled(true);
@@ -182,6 +195,7 @@ public class AddRuleActivity extends AppCompatActivity {
         rule.setName(nameEditText.getText().toString().trim());
         rule.setIsAppGenerated(false);
         rule.setConditions(getAllConditions(rule.getId()));
+        rule.setCountry(null);
 
         db.beginTransaction();
         if (ruleDao.insertRule(db, rule) != -1) {
