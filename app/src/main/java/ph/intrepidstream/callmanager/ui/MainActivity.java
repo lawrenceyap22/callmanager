@@ -25,6 +25,7 @@ import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
 import ph.intrepidstream.callmanager.db.DBHelper;
 import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
+import ph.intrepidstream.callmanager.util.Country;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         lastExpandedGroupInRulesAdapter = -1;
-        rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRules(db));
+        rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRulesByCountry(db, Country.PHILIPPINES));
         expandableListView.setAdapter(rulesAdapter);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
@@ -151,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 DBHelper dbHelper = DBHelper.getInstance(this);
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                rulesAdapter.setRules(ruleDao.retrieveRules(db));
+                rulesAdapter.setRules(ruleDao.retrieveRulesByCountry(db, Country.PHILIPPINES));
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
