@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 
 import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
@@ -30,7 +31,9 @@ import ph.intrepidstream.callmanager.util.Country;
 public class MainActivity extends AppCompatActivity {
 
     public final static String EXTRA_EDIT_RULE = "ph.intrepidstream.callmanager.ui.EDIT_RULE";
+    public final static String EXTRA_SELECTED_COUNTRY = "ph.intrepidstream.callmanager.ui.SELECTED_COUNTRY";
     public final static int ADD_EDIT_RULE_REQUEST = 1;
+    public final static int SELECT_COUNTRY_REQUEST = 2;
 
     private final String TAG = MainActivity.class.getName();
 
@@ -38,12 +41,20 @@ public class MainActivity extends AppCompatActivity {
     private ExpandableBlockListViewAdapter rulesAdapter;
     private int lastExpandedGroupInRulesAdapter;
     private RuleDao ruleDao;
+    private Country country;
+    private ImageView countryImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        country = getSelectedCountry();
+
+        if (country == Country.NONE) {
+            Intent intent = new Intent(this, CountryActivity.class);
+            startActivityForResult(intent, SELECT_COUNTRY_REQUEST);
+        }
         ruleDao = RuleDaoImpl.getInstance();
 
         ActionBar actionBar = getSupportActionBar();
@@ -57,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.activity_main_floating_action_button);
         setupFloatingActionButton(floatingActionButton);
+
     }
 
     @Override
@@ -87,7 +99,19 @@ public class MainActivity extends AppCompatActivity {
 
         LayoutInflater inflater = LayoutInflater.from(this);
         View customView = inflater.inflate(R.layout.actionbar_custom, null);
+        countryImageView = (ImageView) customView.findViewById(R.id.action_bar_select_country);
+        if (country != Country.NONE) {
+            int id = getResources().getIdentifier(country.name().toLowerCase(), "drawable", getPackageName());
+            countryImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), id, null));
+        }
 
+        countryImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent countryIntent = new Intent(MainActivity.this, CountryActivity.class);
+                startActivityForResult(countryIntent, SELECT_COUNTRY_REQUEST);
+            }
+        });
         actionBar.setCustomView(customView);
         actionBar.setDisplayShowCustomEnabled(true);
     }
@@ -109,11 +133,17 @@ public class MainActivity extends AppCompatActivity {
         return sharedPref.getBoolean(getString(R.string.call_manage_service_key), false);
     }
 
+    private Country getSelectedCountry() {
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        String selected = sharedPref.getString(getString(R.string.call_manager_country), Country.NONE.name());
+        return Country.valueOf(selected);
+    }
+
     private void setupExpandableListView(final ExpandableListView expandableListView) {
         DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         lastExpandedGroupInRulesAdapter = -1;
-        rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRulesByCountry(db, Country.PHILIPPINES));
+        rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRulesByCountry(db, country));
         expandableListView.setAdapter(rulesAdapter);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
@@ -148,11 +178,25 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ADD_EDIT_RULE_REQUEST) {
-            if (resultCode == RESULT_OK) {
+        if (requestCode == ADD_EDIT_RULE_REQUEST && resultCode == RESULT_OK) {
+            DBHelper dbHelper = DBHelper.getInstance(this);
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            rulesAdapter.setRules(ruleDao.retrieveRulesByCountry(db, country));
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    rulesAdapter.notifyDataSetChanged();
+                }
+            });
+        } else if (requestCode == SELECT_COUNTRY_REQUEST && resultCode == RESULT_OK) {
+            String newCountryName = data.getStringExtra(EXTRA_SELECTED_COUNTRY);
+            Country newCountry = Country.valueOf(newCountryName);
+            if (country != newCountry) {
+                country = newCountry;
+                countryImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), getResources().getIdentifier(country.name().toLowerCase(), "drawable", getPackageName()), null));
                 DBHelper dbHelper = DBHelper.getInstance(this);
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                rulesAdapter.setRules(ruleDao.retrieveRulesByCountry(db, Country.PHILIPPINES));
+                rulesAdapter.setRules(ruleDao.retrieveRulesByCountry(db, country));
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -168,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(getString(R.string.call_manage_service_key), isServiceEnabled);
+        editor.putString(getString(R.string.call_manager_country), country.name());
         editor.apply();
 
         super.onStop();

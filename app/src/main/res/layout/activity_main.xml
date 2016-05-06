@@ -5,58 +5,58 @@
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/toolbar_rules"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:paddingRight="@dimen/activity_horizontal_margin">
+
+        <TextView
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:background="@color/toolbarRulesTypesBackground"
-            android:id="@+id/toolbar_rules">
+            android:layout_weight="4"
+            android:background="@color/colorPrimaryDark"
+            android:paddingBottom="@dimen/rule_type_toolbar_padding"
+            android:paddingTop="@dimen/rule_type_toolbar_padding"
+            android:text="RULES"
+            android:textAlignment="center"
+            android:textColor="#FFFFFFFF"
+            android:textSize="12sp" />
 
-            <TextView
-                android:layout_weight="4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/rule_type_toolbar_padding"
-                android:paddingBottom="@dimen/rule_type_toolbar_padding"
-                android:background="@color/toolbarRulesBackground"
-                android:textColor="#FFFFFFFF"
-                android:textAlignment="center"
-                android:text="RULES"
-                android:textSize="12dp"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingBottom="@dimen/rule_type_toolbar_padding"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/rule_type_toolbar_padding"
+            android:text="@string/rule_type_off"
+            android:textColor="#FFFFFFFF"
+            android:textSize="12sp" />
 
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/rule_type_toolbar_padding"
-                android:paddingBottom="@dimen/rule_type_toolbar_padding"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:textColor="#FFFFFFFF"
-                android:text="@string/rule_type_off"
-                android:textSize="12dp"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingBottom="@dimen/rule_type_toolbar_padding"
+            android:paddingTop="@dimen/rule_type_toolbar_padding"
+            android:text="@string/rule_type_warn"
+            android:textColor="#FFFFFFFF"
+            android:textSize="12sp" />
 
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/rule_type_toolbar_padding"
-                android:paddingBottom="@dimen/rule_type_toolbar_padding"
-                android:textColor="#FFFFFFFF"
-                android:gravity="center"
-                android:text="@string/rule_type_warn"
-                android:textSize="12dp"/>
-
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/rule_type_toolbar_padding"
-                android:paddingBottom="@dimen/rule_type_toolbar_padding"
-                android:textColor="#FFFFFFFF"
-                android:gravity="end"
-                android:text="@string/rule_type_block"
-                android:textSize="12dp"/>
-        </LinearLayout>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:paddingBottom="@dimen/rule_type_toolbar_padding"
+            android:paddingTop="@dimen/rule_type_toolbar_padding"
+            android:text="@string/rule_type_block"
+            android:textColor="#FFFFFFFF"
+            android:textSize="12sp" />
+    </LinearLayout>
 
     <ExpandableListView
         android:id="@+id/activity_main_expandable_list"
@@ -64,15 +64,15 @@
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar_rules"
         android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"/>
+        android:paddingRight="@dimen/activity_horizontal_margin" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/activity_main_floating_action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_margin="@dimen/fab_margin"
         android:src="@android:drawable/ic_input_add"
         android:tint="@android:color/white"
         ads:backgroundTint="@color/brightBlue" />

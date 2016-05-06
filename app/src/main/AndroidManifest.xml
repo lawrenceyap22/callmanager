@@ -55,6 +55,7 @@
         </receiver>
 
         <activity android:name=".ui.AddRuleActivity" />
+        <activity android:name=".ui.CountryActivity" />
     </application>
 
 </manifest>

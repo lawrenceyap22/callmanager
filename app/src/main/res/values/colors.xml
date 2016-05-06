@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">@color/brightBlue</color>
+    <color name="colorPrimaryDark">@color/lightBlue</color>
+    <color name="colorAccent">@color/lightBlue</color>
 
     <color name="lightBlue">@android:color/holo_blue_light</color>
     <color name="brightBlue">@android:color/holo_blue_bright</color>
 
-    <color name="toolbarRulesBackground">@color/lightBlue</color>
-    <color name="toolbarRulesTypesBackground">@color/brightBlue</color>
 </resources>

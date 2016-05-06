@@ -28,6 +28,7 @@ import ph.intrepidstream.callmanager.dao.impl.RuleDaoImpl;
 import ph.intrepidstream.callmanager.db.DBHelper;
 import ph.intrepidstream.callmanager.dto.Condition;
 import ph.intrepidstream.callmanager.dto.Rule;
+import ph.intrepidstream.callmanager.util.Country;
 
 public class AddRuleActivity extends AppCompatActivity {
 
@@ -195,7 +196,7 @@ public class AddRuleActivity extends AppCompatActivity {
         rule.setName(nameEditText.getText().toString().trim());
         rule.setIsAppGenerated(false);
         rule.setConditions(getAllConditions(rule.getId()));
-        rule.setCountry(null);
+        rule.setCountry(Country.NONE);
 
         db.beginTransaction();
         if (ruleDao.insertRule(db, rule) != -1) {

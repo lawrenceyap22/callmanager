@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_gravity="fill_horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="fill_horizontal">
 
     <ImageView
         android:layout_width="200dp"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
-        android:src="@drawable/topbar_logo"/>
+        android:src="@drawable/topbar_logo" />
+
+    <ImageView
+        android:id="@+id/action_bar_select_country"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" />
 
     <android.support.v7.widget.SwitchCompat
         android:id="@+id/action_bar_switch"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:theme="@style/AppSwitch"
-        android:layout_alignParentRight="true"/>
+        android:layout_toLeftOf="@id/action_bar_select_country"
+        android:layout_toStartOf="@id/action_bar_select_country"
+        android:theme="@style/AppSwitch" />
 
 </RelativeLayout>
