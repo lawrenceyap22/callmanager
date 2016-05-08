@@ -1,17 +1,11 @@
 package ph.intrepidstream.callmanager.ui;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 
 import ph.intrepidstream.callmanager.R;
 import ph.intrepidstream.callmanager.util.AppGlobal;
@@ -21,7 +15,6 @@ public class DialogActivity extends Activity {
 
     public static final String EXTRA_OPERATOR_NAME = "ph.intrepidstream.callmanager.ui.OPERATOR_NAME";
     public static final String EXTRA_DIALOG_TYPE = "ph.intrepidstream.callmanager.ui.DIALOG_TYPE";
-    private static final int PERMISSION_REQUEST_CALL_PHONE = 1;
 
     private String phoneNumber;
 
@@ -44,7 +37,7 @@ public class DialogActivity extends Activity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
-                            attemptCall();
+                            proceedCall();
                             finish();
                         }
                     })
@@ -71,43 +64,6 @@ public class DialogActivity extends Activity {
         alertDialog.show();
     }
 
-    private void attemptCall() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CALL_PHONE)) {
-                    showRequestPermissionRationale(this);
-                } else {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CALL_PHONE);
-                }
-                return;
-            }
-        }
-        proceedCall();
-
-    }
-
-    private void showRequestPermissionRationale(final Activity thisActivity) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.permission_denied_title)
-                .setMessage(R.string.permission_denied_message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.permission_denied_positive, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CALL_PHONE);
-                        dialog.cancel();
-                    }
-                });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-    }
-
     @SuppressWarnings("ResourceType")
     private void proceedCall() {
         Intent callIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + phoneNumber));
@@ -116,21 +72,4 @@ public class DialogActivity extends Activity {
         startActivity(callIntent);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CALL_PHONE: {
-                if (grantResults.length > 0) {
-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        proceedCall();
-                    } else {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
-                            showRequestPermissionRationale(this);
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

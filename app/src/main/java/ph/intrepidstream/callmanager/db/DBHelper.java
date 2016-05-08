@@ -46,6 +46,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private void initializeDefaultData(SQLiteDatabase db) {
         initializePhilippinesData(db);
+        initializeIndonesiaData(db);
     }
 
     private void initializePhilippinesData(SQLiteDatabase db) {

@@ -1,11 +1,18 @@
 package ph.intrepidstream.callmanager.ui;
 
-import android.content.Context;
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +34,7 @@ import ph.intrepidstream.callmanager.db.DBHelper;
 import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
 import ph.intrepidstream.callmanager.util.Country;
+import ph.intrepidstream.callmanager.util.PreferenceManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     public final static String EXTRA_SELECTED_COUNTRY = "ph.intrepidstream.callmanager.ui.SELECTED_COUNTRY";
     public final static int ADD_EDIT_RULE_REQUEST = 1;
     public final static int SELECT_COUNTRY_REQUEST = 2;
+    private static final int PERMISSION_REQUEST_CALL_PHONE = 1;
 
     private final String TAG = MainActivity.class.getName();
 
@@ -49,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        country = getSelectedCountry();
+        country = PreferenceManager.getInstance(this).getCountry();
 
         if (country == Country.NONE) {
             Intent intent = new Intent(this, CountryActivity.class);
@@ -124,19 +133,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        boolean isServiceEnabled = getServiceEnabledStatus();
+        boolean isServiceEnabled = PreferenceManager.getInstance(this).isServiceEnabled();
         serviceEnabledSwitch.setChecked(isServiceEnabled);
-    }
-
-    private boolean getServiceEnabledStatus() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        return sharedPref.getBoolean(getString(R.string.call_manage_service_key), false);
-    }
-
-    private Country getSelectedCountry() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        String selected = sharedPref.getString(getString(R.string.call_manager_country), Country.NONE.name());
-        return Country.valueOf(selected);
     }
 
     private void setupExpandableListView(final ExpandableListView expandableListView) {
@@ -168,12 +166,44 @@ public class MainActivity extends AppCompatActivity {
 
     private void enableService(boolean enable) {
         isServiceEnabled = enable;
+        PreferenceManager.getInstance(this).setServiceEnabled(enable);
         Intent intent = new Intent(this, CallManageService.class);
         if (enable) {
+            askPermission();
             startService(intent);
         } else {
             stopService(intent);
         }
+    }
+
+    private void askPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CALL_PHONE);
+            }
+        }
+    }
+
+    private void showRequestPermissionRationale(final Activity thisActivity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.permission_denied_title)
+                .setMessage(R.string.permission_denied_message)
+                .setCancelable(false)
+                .setPositiveButton(R.string.permission_denied_positive, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setNegativeButton(R.string.permission_denied_negative, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions(thisActivity, new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CALL_PHONE);
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     @Override
@@ -192,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
             String newCountryName = data.getStringExtra(EXTRA_SELECTED_COUNTRY);
             Country newCountry = Country.valueOf(newCountryName);
             if (country != newCountry) {
+                PreferenceManager.getInstance(this).setCountry(newCountry);
                 country = newCountry;
                 countryImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), getResources().getIdentifier(country.name().toLowerCase(), "drawable", getPackageName()), null));
                 DBHelper dbHelper = DBHelper.getInstance(this);
@@ -208,17 +239,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean(getString(R.string.call_manage_service_key), isServiceEnabled);
-        editor.putString(getString(R.string.call_manager_country), country.name());
-        editor.apply();
-
-        super.onStop();
-    }
-
-    @Override
     protected void onDestroy() {
         if (!isServiceEnabled) {
             if (BuildConfig.DEBUG) {
@@ -227,5 +247,21 @@ public class MainActivity extends AppCompatActivity {
             DBHelper.getInstance(this).close();
         }
         super.onDestroy();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CALL_PHONE: {
+                if (grantResults.length > 0) {
+                    if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
+                            showRequestPermissionRationale(this);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

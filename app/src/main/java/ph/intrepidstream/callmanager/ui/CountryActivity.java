@@ -15,12 +15,10 @@ import java.util.List;
 import ph.intrepidstream.callmanager.R;
 import ph.intrepidstream.callmanager.ui.adapter.CountryListViewAdapter;
 import ph.intrepidstream.callmanager.util.Country;
+import ph.intrepidstream.callmanager.util.PreferenceManager;
 
 public class CountryActivity extends AppCompatActivity {
 
-    private final String TAG = CountryActivity.class.getName();
-
-    private List<Country> countries;
     private ListView listView;
     private Country selectedCountry;
 
@@ -37,7 +35,7 @@ public class CountryActivity extends AppCompatActivity {
 
     private void setupCountryExpandableList() {
         Country[] countryArray = Arrays.copyOfRange(Country.values(), 1, Country.values().length);
-        countries = Arrays.asList(countryArray);
+        List<Country> countries = Arrays.asList(countryArray);
 
         listView = (ListView) findViewById(R.id.activity_country_list);
         listView.setAdapter(new CountryListViewAdapter(this, countries));
@@ -69,9 +67,10 @@ public class CountryActivity extends AppCompatActivity {
     }
 
     public void cancel(View view) {
-        setResult(RESULT_CANCELED);
-        finish();
+        if (PreferenceManager.getInstance(this).getCountry() != Country.NONE) {
+            setResult(RESULT_CANCELED);
+            finish();
+        }
     }
-
 
 }
