@@ -99,7 +99,7 @@ public class RuleDaoImpl implements RuleDao {
     @Override
     public Rule getRuleByName(SQLiteDatabase db, String name) {
         Rule rule = null;
-        String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED};
+        String[] columns = {CallManagerDatabaseContract.RuleEntry._ID, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_STATE, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_APP_GENERATED, CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_COUNTRY};
         String selection = CallManagerDatabaseContract.RuleEntry.COLUMN_NAME_NAME + "=?";
         String[] selectionArgs = {name};
         Cursor cursor = db.query(CallManagerDatabaseContract.RuleEntry.TABLE_NAME, columns, selection, selectionArgs, null, null, null);

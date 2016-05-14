@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
+        android:paddingEnd="16dp"
         android:paddingRight="@dimen/activity_horizontal_margin">
 
         <TextView
@@ -19,7 +20,7 @@
             android:background="@color/colorPrimaryDark"
             android:paddingBottom="@dimen/rule_type_toolbar_padding"
             android:paddingTop="@dimen/rule_type_toolbar_padding"
-            android:text="RULES"
+            android:text="@string/rules_label"
             android:textAlignment="center"
             android:textColor="#FFFFFFFF"
             android:textSize="12sp" />
@@ -30,6 +31,7 @@
             android:layout_weight="1"
             android:paddingBottom="@dimen/rule_type_toolbar_padding"
             android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingStart="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/rule_type_toolbar_padding"
             android:text="@string/rule_type_off"
             android:textColor="#FFFFFFFF"
@@ -58,19 +60,52 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <ExpandableListView
-        android:id="@+id/activity_main_expandable_list"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar_rules"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin" />
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/local_carriers_label" />
+
+            <ExpandableListView
+                android:id="@+id/activity_main_expandable_list_local"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:scrollbars="none" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/custom_rules_label" />
+
+            <ExpandableListView
+                android:id="@+id/activity_main_expandable_list_custom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:scrollbars="none" />
+
+        </LinearLayout>
+    </ScrollView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/activity_main_floating_action_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/fab_margin"
         android:src="@android:drawable/ic_input_add"

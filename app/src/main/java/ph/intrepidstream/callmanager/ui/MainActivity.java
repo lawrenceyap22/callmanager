@@ -3,8 +3,10 @@ package ph.intrepidstream.callmanager.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
@@ -25,6 +27,7 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
@@ -34,7 +37,6 @@ import ph.intrepidstream.callmanager.db.DBHelper;
 import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
 import ph.intrepidstream.callmanager.util.Country;
-import ph.intrepidstream.callmanager.util.PreferenceManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,8 +49,10 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = MainActivity.class.getName();
 
     private boolean isServiceEnabled;
-    private ExpandableBlockListViewAdapter rulesAdapter;
-    private int lastExpandedGroupInRulesAdapter;
+    private int lastExpandedGroupInLocalCarriers;
+    private int lastExpandedGroupInCustomRules;
+    private ExpandableListView localCarriers;
+    private ExpandableListView customRules;
     private RuleDao ruleDao;
     private Country country;
     private ImageView countryImageView;
@@ -58,11 +62,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        country = PreferenceManager.getInstance(this).getCountry();
-
+        country = getCountry();
         if (country == Country.NONE) {
-            Intent intent = new Intent(this, CountryActivity.class);
-            startActivityForResult(intent, SELECT_COUNTRY_REQUEST);
+            launchCountryActivity();
         }
         ruleDao = RuleDaoImpl.getInstance();
 
@@ -72,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
         SwitchCompat serviceEnabledSwitch = (SwitchCompat) findViewById(R.id.action_bar_switch);
         setupServiceEnabledSwitch(serviceEnabledSwitch);
 
-        ExpandableListView expandableListView = (ExpandableListView) findViewById(R.id.activity_main_expandable_list);
-        setupExpandableListView(expandableListView);
+        setupLocalCarriersExpandableListView();
+        setupCustomRulesExpandableListView();
 
         FloatingActionButton floatingActionButton = (FloatingActionButton) findViewById(R.id.activity_main_floating_action_button);
         setupFloatingActionButton(floatingActionButton);
@@ -117,12 +119,17 @@ public class MainActivity extends AppCompatActivity {
         countryImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent countryIntent = new Intent(MainActivity.this, CountryActivity.class);
-                startActivityForResult(countryIntent, SELECT_COUNTRY_REQUEST);
+                launchCountryActivity();
             }
         });
         actionBar.setCustomView(customView);
         actionBar.setDisplayShowCustomEnabled(true);
+    }
+
+    private void launchCountryActivity() {
+        Intent countryIntent = new Intent(this, CountryActivity.class);
+        countryIntent.putExtra(EXTRA_SELECTED_COUNTRY, country.name());
+        startActivityForResult(countryIntent, SELECT_COUNTRY_REQUEST);
     }
 
     private void setupServiceEnabledSwitch(SwitchCompat serviceEnabledSwitch) {
@@ -133,23 +140,44 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        boolean isServiceEnabled = PreferenceManager.getInstance(this).isServiceEnabled();
+        boolean isServiceEnabled = isServiceEnabled();
         serviceEnabledSwitch.setChecked(isServiceEnabled);
     }
 
-    private void setupExpandableListView(final ExpandableListView expandableListView) {
+    private void setupLocalCarriersExpandableListView() {
         DBHelper dbHelper = DBHelper.getInstance(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        lastExpandedGroupInRulesAdapter = -1;
-        rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRulesByCountry(db, country));
-        expandableListView.setAdapter(rulesAdapter);
-        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+        localCarriers = (ExpandableListView) findViewById(R.id.activity_main_expandable_list_local);
+        lastExpandedGroupInLocalCarriers = -1;
+        ExpandableBlockListViewAdapter rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRulesByCountry(db, country));
+        localCarriers.setAdapter(rulesAdapter);
+        localCarriers.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
-                if (lastExpandedGroupInRulesAdapter != -1 && lastExpandedGroupInRulesAdapter != groupPosition) {
-                    expandableListView.collapseGroup(lastExpandedGroupInRulesAdapter);
+                if (lastExpandedGroupInLocalCarriers != -1 && lastExpandedGroupInLocalCarriers != groupPosition) {
+                    localCarriers.collapseGroup(lastExpandedGroupInLocalCarriers);
                 }
-                lastExpandedGroupInRulesAdapter = groupPosition;
+                customRules.collapseGroup(lastExpandedGroupInCustomRules);
+                lastExpandedGroupInLocalCarriers = groupPosition;
+            }
+        });
+    }
+
+    private void setupCustomRulesExpandableListView() {
+        DBHelper dbHelper = DBHelper.getInstance(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        customRules = (ExpandableListView) findViewById(R.id.activity_main_expandable_list_custom);
+        lastExpandedGroupInCustomRules = -1;
+        ExpandableBlockListViewAdapter rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveCustomRules(db));
+        customRules.setAdapter(rulesAdapter);
+        customRules.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+            @Override
+            public void onGroupExpand(int groupPosition) {
+                if (lastExpandedGroupInCustomRules != -1 && lastExpandedGroupInCustomRules != groupPosition) {
+                    customRules.collapseGroup(lastExpandedGroupInCustomRules);
+                }
+                localCarriers.collapseGroup(lastExpandedGroupInLocalCarriers);
+                lastExpandedGroupInCustomRules = groupPosition;
             }
         });
     }
@@ -166,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void enableService(boolean enable) {
         isServiceEnabled = enable;
-        PreferenceManager.getInstance(this).setServiceEnabled(enable);
+        setServiceEnabled(enable);
         Intent intent = new Intent(this, CallManageService.class);
         if (enable) {
             askPermission();
@@ -175,6 +203,67 @@ public class MainActivity extends AppCompatActivity {
             stopService(intent);
         }
     }
+
+    private Country getCountry() {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        String selected = sharedPreferences.getString(getString(R.string.call_manager_country), Country.NONE.name());
+        return Country.valueOf(selected);
+    }
+
+    private boolean isServiceEnabled() {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(getString(R.string.call_manage_service_key), false);
+    }
+
+    private void setCountry(Country country) {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(getString(R.string.call_manager_country), country.name());
+        editor.apply();
+    }
+
+    private void setServiceEnabled(boolean isServiceEnabled) {
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(getString(R.string.call_manage_service_key), isServiceEnabled);
+        editor.apply();
+    }
+
+//    private void setListViewHeightBasedOnChildren(ExpandableListView expandableListView) {
+//        ExpandableListAdapter listAdapter = expandableListView.getExpandableListAdapter();
+//        if (listAdapter == null) {
+//            return;
+//        }
+//
+//        int totalHeight = expandableListView.getPaddingTop() + expandableListView.getPaddingBottom();
+//        for (int i = 0; i < listAdapter.getGroupCount(); i++) {
+//            View groupView = listAdapter.getGroupView(i, false, null, expandableListView);
+//            if (groupView instanceof ViewGroup) {
+//                groupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//            }
+//            groupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+//            totalHeight += groupView.getMeasuredHeight();
+//
+//            if (expandableListView.isGroupExpanded(i)) {
+//                for (int j = 0; j < listAdapter.getChildrenCount(i); j++) {
+//                    View childView = listAdapter.getChildView(i, j, false, null, expandableListView);
+//                    if (childView instanceof ViewGroup) {
+//                        groupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//                    }
+//                    childView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+//                    totalHeight += childView.getMeasuredHeight();
+//
+//
+//                }
+//            }
+//        }
+//
+//        ViewGroup.LayoutParams params = expandableListView.getLayoutParams();
+//        params.height = totalHeight + (expandableListView.getDividerHeight() * (listAdapter.getGroupCount() - 1));
+//
+//        expandableListView.setLayoutParams(params);
+//        expandableListView.requestLayout();
+//    }
 
     private void askPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -211,27 +300,29 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == ADD_EDIT_RULE_REQUEST && resultCode == RESULT_OK) {
             DBHelper dbHelper = DBHelper.getInstance(this);
             SQLiteDatabase db = dbHelper.getReadableDatabase();
-            rulesAdapter.setRules(ruleDao.retrieveRulesByCountry(db, country));
+            final ExpandableBlockListViewAdapter customRulesAdapter = (ExpandableBlockListViewAdapter) customRules.getExpandableListAdapter();
+            customRulesAdapter.setRules(ruleDao.retrieveCustomRules(db));
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    rulesAdapter.notifyDataSetChanged();
+                    customRulesAdapter.notifyDataSetChanged();
                 }
             });
         } else if (requestCode == SELECT_COUNTRY_REQUEST && resultCode == RESULT_OK) {
             String newCountryName = data.getStringExtra(EXTRA_SELECTED_COUNTRY);
             Country newCountry = Country.valueOf(newCountryName);
+            final ExpandableBlockListViewAdapter localCarriersAdapter = (ExpandableBlockListViewAdapter) localCarriers.getExpandableListAdapter();
             if (country != newCountry) {
-                PreferenceManager.getInstance(this).setCountry(newCountry);
+                setCountry(newCountry);
                 country = newCountry;
                 countryImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), getResources().getIdentifier(country.name().toLowerCase(), "drawable", getPackageName()), null));
                 DBHelper dbHelper = DBHelper.getInstance(this);
                 SQLiteDatabase db = dbHelper.getReadableDatabase();
-                rulesAdapter.setRules(ruleDao.retrieveRulesByCountry(db, country));
+                localCarriersAdapter.setRules(ruleDao.retrieveRulesByCountry(db, country));
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        rulesAdapter.notifyDataSetChanged();
+                        localCarriersAdapter.notifyDataSetChanged();
                     }
                 });
             }
@@ -254,12 +345,9 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSION_REQUEST_CALL_PHONE: {
-                if (grantResults.length > 0) {
-                    if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
-                            showRequestPermissionRationale(this);
-                        }
-                    }
+                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
+                    showRequestPermissionRationale(this);
                 }
             }
         }

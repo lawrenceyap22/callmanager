@@ -92,13 +92,37 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         TextView textView = (TextView) convertView.findViewById(R.id.blocklist_group_name_textview);
         textView.setText(rule.getName());
 
+        AppCompatImageButton editButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_group_edit);
+        AppCompatImageButton deleteButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_group_delete);
+        if (rule.isAppGenerated()) {
+            editButton.setVisibility(View.INVISIBLE);
+            deleteButton.setVisibility(View.INVISIBLE);
+        } else {
+            editButton.setVisibility(View.VISIBLE);
+            editButton.setFocusable(false);
+            deleteButton.setVisibility(View.VISIBLE);
+            deleteButton.setFocusable(false);
+            editButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editRule(rule);
+                }
+            });
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    warnDeleteRule(rule);
+                }
+            });
+        }
+
         MultiStateSlider multiStateSlider = (MultiStateSlider) convertView.findViewById(R.id.blocklist_group_state_toggle);
         multiStateSlider.clearListeners();
         multiStateSlider.setCurrentState(rule.getState().toString());
         multiStateSlider.addOnStateChangedListener(new MultiStateSlider.OnStateChangedListener() {
             @Override
             public void onStateChanged(String oldState, String newState) {
-                if(!oldState.equals(newState)) {
+                if (!oldState.equals(newState)) {
                     Rule newRule = new Rule(rule);
                     newRule.setState(RuleState.findByDisplayText(newState));
                     updateRule(rule, newRule);
@@ -123,28 +147,6 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         FlowLayout numbersLayout = (FlowLayout) convertView.findViewById(R.id.blocklist_child_numbers);
         numbersLayout.removeAllViews();
 
-        final Rule rule = (Rule) getGroup(groupPosition);
-        AppCompatImageButton editButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_child_edit);
-        AppCompatImageButton deleteButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_child_delete);
-        if (rule.isAppGenerated()) {
-            editButton.setVisibility(View.GONE);
-            deleteButton.setVisibility(View.GONE);
-        } else {
-            editButton.setVisibility(View.VISIBLE);
-            deleteButton.setVisibility(View.VISIBLE);
-            editButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editRule(rule);
-                }
-            });
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    warnDeleteRule(rule);
-                }
-            });
-        }
         View childView;
         TextView number;
         for (Condition condition : conditions) {

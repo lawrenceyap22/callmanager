@@ -46,6 +46,7 @@
             android:layout_gravity="center"
             android:onClick="addInput"
             android:src="@android:drawable/ic_input_add"
+            android:tint="@color/colorPrimary"
             ads:backgroundTint="?android:colorBackground" />
 
     </LinearLayout>
