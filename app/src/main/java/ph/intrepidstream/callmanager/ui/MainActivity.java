@@ -24,10 +24,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import ph.intrepidstream.callmanager.BuildConfig;
 import ph.intrepidstream.callmanager.R;
@@ -159,8 +160,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 customRules.collapseGroup(lastExpandedGroupInCustomRules);
                 lastExpandedGroupInLocalCarriers = groupPosition;
+                setListViewHeightBasedOnChildren(localCarriers);
             }
         });
+
+        localCarriers.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+            @Override
+            public void onGroupCollapse(int groupPosition) {
+                setListViewHeightBasedOnChildren(localCarriers);
+            }
+        });
+        setListViewHeightBasedOnChildren(localCarriers);
     }
 
     private void setupCustomRulesExpandableListView() {
@@ -178,8 +188,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 localCarriers.collapseGroup(lastExpandedGroupInLocalCarriers);
                 lastExpandedGroupInCustomRules = groupPosition;
+                setListViewHeightBasedOnChildren(customRules);
             }
         });
+
+        customRules.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+            @Override
+            public void onGroupCollapse(int groupPosition) {
+                setListViewHeightBasedOnChildren(customRules);
+            }
+        });
+        setListViewHeightBasedOnChildren(customRules);
     }
 
     private void setupFloatingActionButton(FloatingActionButton floatingActionButton) {
@@ -229,41 +248,44 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
-//    private void setListViewHeightBasedOnChildren(ExpandableListView expandableListView) {
-//        ExpandableListAdapter listAdapter = expandableListView.getExpandableListAdapter();
-//        if (listAdapter == null) {
-//            return;
-//        }
-//
-//        int totalHeight = expandableListView.getPaddingTop() + expandableListView.getPaddingBottom();
-//        for (int i = 0; i < listAdapter.getGroupCount(); i++) {
-//            View groupView = listAdapter.getGroupView(i, false, null, expandableListView);
-//            if (groupView instanceof ViewGroup) {
-//                groupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//            }
-//            groupView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-//            totalHeight += groupView.getMeasuredHeight();
-//
-//            if (expandableListView.isGroupExpanded(i)) {
-//                for (int j = 0; j < listAdapter.getChildrenCount(i); j++) {
-//                    View childView = listAdapter.getChildView(i, j, false, null, expandableListView);
-//                    if (childView instanceof ViewGroup) {
-//                        groupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//                    }
-//                    childView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-//                    totalHeight += childView.getMeasuredHeight();
-//
-//
-//                }
-//            }
-//        }
-//
-//        ViewGroup.LayoutParams params = expandableListView.getLayoutParams();
-//        params.height = totalHeight + (expandableListView.getDividerHeight() * (listAdapter.getGroupCount() - 1));
-//
-//        expandableListView.setLayoutParams(params);
-//        expandableListView.requestLayout();
-//    }
+    private void setListViewHeightBasedOnChildren(ExpandableListView expandableListView) {
+        ExpandableListAdapter listAdapter = expandableListView.getExpandableListAdapter();
+        if (listAdapter == null) {
+            return;
+        }
+
+        int totalHeight = expandableListView.getPaddingTop() + expandableListView.getPaddingBottom();
+        for (int i = 0; i < listAdapter.getGroupCount(); i++) {
+            View groupView = listAdapter.getGroupView(i, false, null, expandableListView);
+            if (groupView instanceof ViewGroup) {
+                groupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            }
+            int height = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            groupView.measure(0, height);
+            totalHeight += groupView.getMeasuredHeight();
+
+            if (expandableListView.isGroupExpanded(i)) {
+                int childWidth;
+                int childHeight;
+                for (int j = 0; j < listAdapter.getChildrenCount(i); j++) {
+                    View childView = listAdapter.getChildView(i, j, false, null, expandableListView);
+                    if (childView instanceof ViewGroup) {
+                        groupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    }
+                    childWidth = View.MeasureSpec.makeMeasureSpec(expandableListView.getWidth(), View.MeasureSpec.AT_MOST);
+                    childHeight = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+                    childView.measure(childWidth, childHeight);
+                    totalHeight += childView.getMeasuredHeight();
+                }
+            }
+        }
+
+        ViewGroup.LayoutParams params = expandableListView.getLayoutParams();
+        params.height = totalHeight + (expandableListView.getDividerHeight() * (listAdapter.getGroupCount() - 1));
+
+        expandableListView.setLayoutParams(params);
+        expandableListView.requestLayout();
+    }
 
     private void askPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -306,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     customRulesAdapter.notifyDataSetChanged();
+                    setListViewHeightBasedOnChildren(customRules);
                 }
             });
         } else if (requestCode == SELECT_COUNTRY_REQUEST && resultCode == RESULT_OK) {
@@ -323,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         localCarriersAdapter.notifyDataSetChanged();
+                        setListViewHeightBasedOnChildren(localCarriers);
                     }
                 });
             }
