@@ -1,6 +1,7 @@
 package ph.intrepidstream.callmanager.ui.custom;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -45,6 +46,7 @@ public class MultiStateSlider extends SeekBar implements SeekBar.OnSeekBarChange
         currentStateIndex = getProgress();
         setThumbColor(stateColors.get(currentStateIndex));
         setBackground(new BackgroundDrawable());
+        setProgressDrawable(new BackgroundDrawable());
 
         setOnSeekBarChangeListener(this);
     }

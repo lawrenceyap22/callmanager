@@ -95,12 +95,12 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
         AppCompatImageButton editButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_group_edit);
         AppCompatImageButton deleteButton = (AppCompatImageButton) convertView.findViewById(R.id.blocklist_group_delete);
         if (rule.isAppGenerated()) {
-            editButton.setVisibility(View.INVISIBLE);
-            deleteButton.setVisibility(View.INVISIBLE);
+            editButton.setVisibility(View.GONE);
+            deleteButton.setVisibility(View.GONE);
         } else {
-            editButton.setVisibility(View.VISIBLE);
+            editButton.setVisibility(View.GONE);
             editButton.setFocusable(false);
-            deleteButton.setVisibility(View.VISIBLE);
+            deleteButton.setVisibility(View.GONE);
             deleteButton.setFocusable(false);
             editButton.setOnClickListener(new View.OnClickListener() {
                 @Override

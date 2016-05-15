@@ -4,11 +4,7 @@
     android:layout_height="match_parent"
     android:baselineAligned="false"
     android:minHeight="50dp"
-    android:orientation="horizontal"
-    android:paddingEnd="@dimen/activity_horizontal_margin"
-    android:paddingLeft="40dp"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingStart="40dp">
+    android:orientation="horizontal">
 
     <TextView
         android:id="@+id/blocklist_group_name_textview"
@@ -16,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="4"
+        android:paddingLeft="35dp"
         android:ellipsize="none"
         android:singleLine="false"
         android:textSize="14sp" />
@@ -38,7 +35,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="3"
-        android:focusable="false"
-        android:progressTint="#00000000" />
+        android:focusable="false" />
 
 </LinearLayout>
