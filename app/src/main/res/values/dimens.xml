@@ -5,4 +5,13 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="rule_type_toolbar_padding">10dp</dimen>
+    <dimen name="rule_type_toolbar_side_padding">8dp</dimen>
+
+    <dimen name="rule_type_toolbar_text_size">12sp</dimen>
+
+    <dimen name="list_view_header_padding">8dp</dimen>
+    <dimen name="list_view_vertical_spacing">4dp</dimen>
+
+    <dimen name="list_view_control_icon_width">22dp</dimen>
+    <dimen name="list_view_control_icon_height">22dp</dimen>
 </resources>

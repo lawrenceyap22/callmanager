@@ -21,15 +21,15 @@
             android:text="@string/rules_label"
             android:textAlignment="center"
             android:textColor="#FFFFFFFF"
-            android:textSize="12sp" />
+            android:textSize="@dimen/rule_type_toolbar_text_size" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:background="@color/colorPrimary"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
+            android:paddingLeft="@dimen/rule_type_toolbar_side_padding"
+            android:paddingRight="@dimen/rule_type_toolbar_side_padding"
             android:layout_weight="3">
 
             <TextView
@@ -38,7 +38,7 @@
                 android:layout_weight="1"
                 android:text="@string/rule_type_off"
                 android:textColor="#FFFFFFFF"
-                android:textSize="12sp" />
+                android:textSize="@dimen/rule_type_toolbar_text_size" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -47,7 +47,7 @@
                 android:gravity="center"
                 android:text="@string/rule_type_warn"
                 android:textColor="#FFFFFFFF"
-                android:textSize="12sp" />
+                android:textSize="@dimen/rule_type_toolbar_text_size" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -56,7 +56,7 @@
                 android:gravity="end"
                 android:text="@string/rule_type_block"
                 android:textColor="#FFFFFFFF"
-                android:textSize="12sp" />
+                android:textSize="@dimen/rule_type_toolbar_text_size" />
 
         </LinearLayout>
 
@@ -71,35 +71,51 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="@dimen/list_view_vertical_spacing"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:paddingLeft="@dimen/list_view_header_padding"
+                android:paddingBottom="@dimen/list_view_vertical_spacing"
                 android:text="@string/local_carriers_label" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#60000000" />
 
             <ExpandableListView
                 android:id="@+id/activity_main_expandable_list_local"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
                 android:scrollbars="none" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:paddingLeft="@dimen/list_view_header_padding"
+                android:paddingBottom="@dimen/list_view_vertical_spacing"
+                android:paddingTop="@dimen/list_view_vertical_spacing"
                 android:text="@string/custom_rules_label" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#60000000" />
 
             <ExpandableListView
                 android:id="@+id/activity_main_expandable_list_custom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingBottom="@dimen/list_view_vertical_spacing"
                 android:scrollbars="none" />
 
         </LinearLayout>
+
     </ScrollView>
 
     <android.support.design.widget.FloatingActionButton

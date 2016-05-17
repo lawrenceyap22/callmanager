@@ -38,7 +38,7 @@ public class CallManageService extends Service {
 
     private void createOngoingNotification() {
         Notification.Builder mBuilder = new Notification.Builder(this)
-                .setSmallIcon(android.R.drawable.ic_btn_speak_now)
+                .setSmallIcon(R.mipmap.notification_icon)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.notification_content))
                 .setOngoing(true);

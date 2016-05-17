@@ -4,30 +4,44 @@
     android:layout_height="match_parent"
     android:baselineAligned="false"
     android:minHeight="50dp"
+    android:paddingRight="8dp"
     android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/blocklist_group_name_textview"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_weight="4"
-        android:paddingLeft="35dp"
-        android:ellipsize="none"
-        android:singleLine="false"
-        android:textSize="14sp" />
+        android:layout_gravity="center">
 
-    <android.support.v7.widget.AppCompatImageButton
-        android:id="@+id/blocklist_group_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_menu_delete" />
+        <TextView
+            android:id="@+id/blocklist_group_name_textview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="none"
+            android:paddingLeft="35dp"
+            android:layout_gravity="center"
+            android:singleLine="false"
+            android:textSize="14sp" />
 
-    <android.support.v7.widget.AppCompatImageButton
-        android:id="@+id/blocklist_group_edit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_menu_edit" />
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/blocklist_group_edit"
+            android:layout_width="@dimen/list_view_control_icon_width"
+            android:layout_height="@dimen/list_view_control_icon_height"
+            android:layout_marginRight="4dp"
+            android:clickable="true"
+            android:layout_gravity="center"
+            android:background="@drawable/blocklist_group_edit_selector"/>
+
+        <android.support.v7.widget.AppCompatImageButton
+            android:id="@+id/blocklist_group_delete"
+            android:layout_width="@dimen/list_view_control_icon_width"
+            android:layout_height="@dimen/list_view_control_icon_height"
+            android:clickable="true"
+            android:layout_gravity="center"
+            android:background="@drawable/blocklist_group_delete_selector" />
+
+    </LinearLayout>
 
     <ph.intrepidstream.callmanager.ui.custom.MultiStateSlider
         android:id="@+id/blocklist_group_state_toggle"
