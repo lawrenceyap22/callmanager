@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import org.apmem.tools.layouts.FlowLayout;
@@ -28,6 +29,7 @@ import ph.intrepidstream.callmanager.dto.Rule;
 import ph.intrepidstream.callmanager.ui.AddRuleActivity;
 import ph.intrepidstream.callmanager.ui.MainActivity;
 import ph.intrepidstream.callmanager.ui.custom.MultiStateSlider;
+import ph.intrepidstream.callmanager.util.ListViewUtil;
 import ph.intrepidstream.callmanager.util.RuleState;
 
 public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
@@ -36,10 +38,12 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<Rule> rules;
+    private ExpandableListView parent;
 
-    public ExpandableBlockListViewAdapter(Context context, List<Rule> rules) {
+    public ExpandableBlockListViewAdapter(Context context, List<Rule> rules, ExpandableListView parent) {
         this.context = context;
         this.rules = rules;
+        this.parent = parent;
     }
 
     public void setRules(List<Rule> rules) {
@@ -217,10 +221,12 @@ public class ExpandableBlockListViewAdapter extends BaseExpandableListAdapter {
             }
             rules.remove(rule);
             notifyDataSetChanged();
+            ListViewUtil.setListViewHeightBasedOnChildren(parent);
             db.setTransactionSuccessful();
         }
         db.endTransaction();
     }
+
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {

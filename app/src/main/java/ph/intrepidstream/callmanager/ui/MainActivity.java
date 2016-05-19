@@ -24,9 +24,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 
@@ -38,6 +36,7 @@ import ph.intrepidstream.callmanager.db.DBHelper;
 import ph.intrepidstream.callmanager.service.CallManageService;
 import ph.intrepidstream.callmanager.ui.adapter.ExpandableBlockListViewAdapter;
 import ph.intrepidstream.callmanager.util.Country;
+import ph.intrepidstream.callmanager.util.ListViewUtil;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,13 +56,14 @@ public class MainActivity extends AppCompatActivity {
     private RuleDao ruleDao;
     private Country country;
     private ImageView countryImageView;
+    private SwitchCompat serviceEnabledSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        country = getCountry();
+        country = getCountryPreferences();
         if (country == Country.NONE) {
             launchCountryActivity();
         }
@@ -72,8 +72,7 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         setupCustomActionBar(actionBar);
 
-        SwitchCompat serviceEnabledSwitch = (SwitchCompat) findViewById(R.id.action_bar_switch);
-        setupServiceEnabledSwitch(serviceEnabledSwitch);
+        setupServiceEnabledSwitch();
 
         setupLocalCarriersExpandableListView();
         setupCustomRulesExpandableListView();
@@ -133,16 +132,16 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(countryIntent, SELECT_COUNTRY_REQUEST);
     }
 
-    private void setupServiceEnabledSwitch(SwitchCompat serviceEnabledSwitch) {
+    private void setupServiceEnabledSwitch() {
+        serviceEnabledSwitch = (SwitchCompat) findViewById(R.id.action_bar_switch);
         serviceEnabledSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                enableService(isChecked);
+                setServiceEnabled(isChecked);
             }
         });
 
-        boolean isServiceEnabled = isServiceEnabled();
-        serviceEnabledSwitch.setChecked(isServiceEnabled);
+        serviceEnabledSwitch.setChecked(isServiceEnabledPreferences());
     }
 
     private void setupLocalCarriersExpandableListView() {
@@ -150,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         localCarriers = (ExpandableListView) findViewById(R.id.activity_main_expandable_list_local);
         lastExpandedGroupInLocalCarriers = -1;
-        ExpandableBlockListViewAdapter rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRulesByCountry(db, country));
+        ExpandableBlockListViewAdapter rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveRulesByCountry(db, country), localCarriers);
         localCarriers.setAdapter(rulesAdapter);
         localCarriers.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
@@ -160,17 +159,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 customRules.collapseGroup(lastExpandedGroupInCustomRules);
                 lastExpandedGroupInLocalCarriers = groupPosition;
-                setListViewHeightBasedOnChildren(localCarriers);
+                ListViewUtil.setListViewHeightBasedOnChildren(localCarriers);
             }
         });
 
         localCarriers.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
             @Override
             public void onGroupCollapse(int groupPosition) {
-                setListViewHeightBasedOnChildren(localCarriers);
+                ListViewUtil.setListViewHeightBasedOnChildren(localCarriers);
             }
         });
-        setListViewHeightBasedOnChildren(localCarriers);
+        ListViewUtil.setListViewHeightBasedOnChildren(localCarriers);
     }
 
     private void setupCustomRulesExpandableListView() {
@@ -178,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         customRules = (ExpandableListView) findViewById(R.id.activity_main_expandable_list_custom);
         lastExpandedGroupInCustomRules = -1;
-        ExpandableBlockListViewAdapter rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveCustomRules(db));
+        ExpandableBlockListViewAdapter rulesAdapter = new ExpandableBlockListViewAdapter(this, ruleDao.retrieveCustomRules(db), customRules);
         customRules.setAdapter(rulesAdapter);
         customRules.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
@@ -188,17 +187,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 localCarriers.collapseGroup(lastExpandedGroupInLocalCarriers);
                 lastExpandedGroupInCustomRules = groupPosition;
-                setListViewHeightBasedOnChildren(customRules);
+                ListViewUtil.setListViewHeightBasedOnChildren(customRules);
             }
         });
 
         customRules.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
             @Override
             public void onGroupCollapse(int groupPosition) {
-                setListViewHeightBasedOnChildren(customRules);
+                ListViewUtil.setListViewHeightBasedOnChildren(customRules);
             }
         });
-        setListViewHeightBasedOnChildren(customRules);
+        ListViewUtil.setListViewHeightBasedOnChildren(customRules);
     }
 
     private void setupFloatingActionButton(FloatingActionButton floatingActionButton) {
@@ -211,94 +210,58 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void enableService(boolean enable) {
-        isServiceEnabled = enable;
-        setServiceEnabled(enable);
+    private void setServiceEnabled(boolean enable) {
         Intent intent = new Intent(this, CallManageService.class);
-        if (enable) {
-            askPermission();
+        if (enable && isPermissionGranted()) {
             startService(intent);
+            isServiceEnabled = true;
         } else {
             stopService(intent);
+            isServiceEnabled = false;
         }
+        serviceEnabledSwitch.setChecked(isServiceEnabled);
+        setServiceEnabledPreferences(isServiceEnabled);
     }
 
-    private Country getCountry() {
+    private Country getCountryPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         String selected = sharedPreferences.getString(getString(R.string.call_manager_country), Country.NONE.name());
         return Country.valueOf(selected);
     }
 
-    private boolean isServiceEnabled() {
+    private boolean isServiceEnabledPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean(getString(R.string.call_manage_service_key), false);
     }
 
-    private void setCountry(Country country) {
+    private void setCountryPreferences(Country country) {
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(getString(R.string.call_manager_country), country.name());
         editor.apply();
     }
 
-    private void setServiceEnabled(boolean isServiceEnabled) {
+    private void setServiceEnabledPreferences(boolean isServiceEnabled) {
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(getString(R.string.call_manage_service_key), isServiceEnabled);
         editor.apply();
     }
 
-    private void setListViewHeightBasedOnChildren(ExpandableListView expandableListView) {
-        ExpandableListAdapter listAdapter = expandableListView.getExpandableListAdapter();
-        if (listAdapter == null) {
-            return;
-        }
-
-        int totalHeight = expandableListView.getPaddingTop() + expandableListView.getPaddingBottom();
-        for (int i = 0; i < listAdapter.getGroupCount(); i++) {
-            View groupView = listAdapter.getGroupView(i, false, null, expandableListView);
-            if (groupView instanceof ViewGroup) {
-                groupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            }
-            int height = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            groupView.measure(0, height);
-            totalHeight += groupView.getMeasuredHeight();
-
-            if (expandableListView.isGroupExpanded(i)) {
-                int childWidth;
-                int childHeight;
-                for (int j = 0; j < listAdapter.getChildrenCount(i); j++) {
-                    View childView = listAdapter.getChildView(i, j, false, null, expandableListView);
-                    if (childView instanceof ViewGroup) {
-                        groupView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    }
-                    childWidth = View.MeasureSpec.makeMeasureSpec(expandableListView.getWidth(), View.MeasureSpec.AT_MOST);
-                    childHeight = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-                    childView.measure(childWidth, childHeight);
-                    totalHeight += childView.getMeasuredHeight();
-                }
-            }
-        }
-
-        ViewGroup.LayoutParams params = expandableListView.getLayoutParams();
-        params.height = totalHeight + (expandableListView.getDividerHeight() * (listAdapter.getGroupCount() - 1));
-
-        expandableListView.setLayoutParams(params);
-        expandableListView.requestLayout();
-    }
-
-    private void askPermission() {
+    private boolean isPermissionGranted() {
+        boolean permissionGranted = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_DENIED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CALL_PHONE);
+                permissionGranted = false;
             }
         }
+        return permissionGranted;
     }
 
     private void showRequestPermissionRationale(final Activity thisActivity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.permission_denied_title)
-                .setMessage(R.string.permission_denied_message)
+        builder.setMessage(R.string.permission_denied_message)
                 .setCancelable(false)
                 .setPositiveButton(R.string.permission_denied_positive, new DialogInterface.OnClickListener() {
                     @Override
@@ -328,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     customRulesAdapter.notifyDataSetChanged();
-                    setListViewHeightBasedOnChildren(customRules);
+                    ListViewUtil.setListViewHeightBasedOnChildren(customRules);
                 }
             });
         } else if (requestCode == SELECT_COUNTRY_REQUEST && resultCode == RESULT_OK) {
@@ -336,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
             Country newCountry = Country.valueOf(newCountryName);
             final ExpandableBlockListViewAdapter localCarriersAdapter = (ExpandableBlockListViewAdapter) localCarriers.getExpandableListAdapter();
             if (country != newCountry) {
-                setCountry(newCountry);
+                setCountryPreferences(newCountry);
                 country = newCountry;
                 countryImageView.setImageDrawable(ResourcesCompat.getDrawable(getResources(), getResources().getIdentifier(country.name().toLowerCase(), "drawable", getPackageName()), null));
                 DBHelper dbHelper = DBHelper.getInstance(this);
@@ -346,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         localCarriersAdapter.notifyDataSetChanged();
-                        setListViewHeightBasedOnChildren(localCarriers);
+                        ListViewUtil.setListViewHeightBasedOnChildren(localCarriers);
                     }
                 });
             }
@@ -369,9 +332,15 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSION_REQUEST_CALL_PHONE: {
-                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
-                    showRequestPermissionRationale(this);
+                if (grantResults.length > 0) {
+                    int grantResult = grantResults[0];
+                    if (grantResult == PackageManager.PERMISSION_DENIED) {
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
+                            showRequestPermissionRationale(this);
+                        }
+                    } else {
+                        setServiceEnabled(true);
+                    }
                 }
             }
         }
