@@ -48,10 +48,11 @@ public class CountryActivity extends AppCompatActivity {
         });
 
         //TODO set selected country
-//        int selectedIndex = countries.indexOf(selectedCountry);
-//        if (selectedIndex >= 0) {
-//
-//        }
+        int selectedIndex = countries.indexOf(selectedCountry);
+        if (selectedIndex >= 0) {
+//            listView.requestFocusFromTouch();
+            listView.setItemChecked(selectedIndex, true);
+        }
     }
 
     private void initCustomActionBar(ActionBar actionBar) {

@@ -47,6 +47,22 @@ public class DBHelper extends SQLiteOpenHelper {
     private void initializeDefaultData(SQLiteDatabase db) {
         initializePhilippinesData(db);
         initializeIndonesiaData(db);
+        initializeThailandData(db);
+        initializeMalaysiaData(db);
+        initializeHongKongData(db);
+        initializeSingaporeData(db);
+        initializeVietnamData(db);
+        initializeMyanmarData(db);
+        initializeCambodiaData(db);
+        initializeBruneiData(db);
+        initializeMacaoData(db);
+        initializeLaosData(db);
+        initializeIndiaData(db);
+        initializeChinaData(db);
+        initializeJapanData(db);
+        initializeSouthKoreaData(db);
+        initializeTaiwanData(db);
+        initializeMongoliaData(db);
     }
 
     private void initializePhilippinesData(SQLiteDatabase db) {
@@ -72,6 +88,70 @@ public class DBHelper extends SQLiteOpenHelper {
         defaultData.put(context.getString(R.string.hutchison_3_indonesia_operator), context.getString(R.string.hutchison_3_indonesia_prefixes).split(","));
 
         insertData(db, defaultData, Country.INDONESIA);
+    }
+
+    private void initializeThailandData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeMalaysiaData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeHongKongData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeSingaporeData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeVietnamData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeMyanmarData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeCambodiaData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeBruneiData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeMacaoData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeLaosData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeIndiaData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeChinaData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeJapanData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeSouthKoreaData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeTaiwanData(SQLiteDatabase db) {
+        //TODO
+    }
+
+    private void initializeMongoliaData(SQLiteDatabase db) {
+        //TODO
     }
 
     private void insertData(SQLiteDatabase db, Map<String, String[]> data, Country country) {

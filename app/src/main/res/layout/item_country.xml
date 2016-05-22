@@ -3,6 +3,7 @@
     android:id="@+id/country_label"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?android:attr/activatedBackgroundIndicator"
     android:drawablePadding="26dp"
     android:paddingBottom="15dp"
     android:paddingLeft="26dp"
